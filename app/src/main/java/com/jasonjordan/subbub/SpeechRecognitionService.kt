@@ -10,6 +10,7 @@ import android.media.projection.MediaProjectionManager
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
@@ -240,6 +241,7 @@ class SpeechRecognitionService : LifecycleService() {
     }
 
     private fun processText(text: String) {
+        Log.d(TAG, "processText: raw='$text' src=${SubtitleState.sourceLanguage.value} tgt=${SubtitleState.targetLanguage.value}")
         val sourceLang = SubtitleState.sourceLanguage.value
         val targetLang = SubtitleState.targetLanguage.value
         val needsTranslation = sourceLang.isNotBlank() && targetLang.isNotBlank() && sourceLang != targetLang
@@ -249,6 +251,7 @@ class SpeechRecognitionService : LifecycleService() {
                 val translated = withContext(Dispatchers.IO) {
                     translationManager?.translate(text, sourceLang, targetLang) ?: text
                 }
+                Log.d(TAG, "processText: translated='$translated'")
                 showSubtitle(translated)
                 scheduleClear(translated)
             }
@@ -259,6 +262,7 @@ class SpeechRecognitionService : LifecycleService() {
     }
 
     private fun showSubtitle(text: String) {
+        Log.d(TAG, "showSubtitle: '$text'")
         SubtitleState.currentText.value = text
     }
 

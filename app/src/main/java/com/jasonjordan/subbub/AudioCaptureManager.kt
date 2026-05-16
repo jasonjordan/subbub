@@ -66,9 +66,16 @@ class AudioCaptureManager {
 
         captureJob = scope.launch {
             val buffer = ByteArray(minBuffer)
+            var logCounter = 0
             while (isActive) {
                 val read = audioRecord?.read(buffer, 0, buffer.size) ?: -1
                 if (read > 0) {
+                    logCounter++
+                    if (logCounter >= 100) {
+                        logCounter = 0
+                        val rms = calculateRms(buffer.copyOf(read))
+                        Log.d(TAG, "Mic RMS level: $rms (samples=${read / 2})")
+                    }
                     onPcmData(buffer.copyOf(read))
                 }
             }
@@ -125,11 +132,19 @@ class AudioCaptureManager {
 
         captureJob = scope.launch {
             val stereoBuffer = ByteArray(minBuffer)
+            var logCounter = 0
             while (isActive) {
                 val read = audioRecord?.read(stereoBuffer, 0, stereoBuffer.size) ?: -1
                 if (read > 0) {
                     val mono16k = downsample48kStereoTo16kMono(stereoBuffer.copyOf(read))
                     if (mono16k.isNotEmpty()) {
+                        // Log audio level every ~2 seconds for debugging
+                        logCounter++
+                        if (logCounter >= 100) {
+                            logCounter = 0
+                            val rms = calculateRms(mono16k)
+                            Log.d(TAG, "Audio RMS level: $rms (samples=${mono16k.size / 2})")
+                        }
                         onPcmData(mono16k)
                     }
                 }
@@ -172,6 +187,21 @@ class AudioCaptureManager {
             monoBytes[outIndex + 1] = ((avg.toInt() shr 8) and 0xFF).toByte()
         }
         return monoBytes
+    }
+
+    /**
+     * Calculate RMS of 16-bit mono PCM bytes for debugging.
+     */
+    private fun calculateRms(pcm16: ByteArray): Double {
+        var sum = 0.0
+        val samples = pcm16.size / 2
+        for (i in 0 until samples) {
+            val sample = (pcm16[i * 2].toInt() and 0xFF) or
+                    ((pcm16[i * 2 + 1].toInt() and 0xFF) shl 8)
+            val s = sample.toShort().toInt()
+            sum += s * s.toDouble()
+        }
+        return kotlin.math.sqrt(sum / samples)
     }
 
     fun stop() {
