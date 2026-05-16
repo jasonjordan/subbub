@@ -1,0 +1,92 @@
+<![CDATA[
+<font color="#FF03DAC5"><b>What is subbub?</b></font><br>
+subbub listens to the audio of whatever you are watching and translates it into subtitles in real time in the language you choose. You can place subtitles directly over your screen so you can keep watching while reading.
+<br><br>
+
+<font color="#FF03DAC5"><b>Supported Devices</b></font><br>
+subbub works on Android TV and Google TV running Android 13, 14 or 15.
+<br><br>
+
+<font color="#FF03DAC5"><b>How to Use</b></font><br><br>
+<b>1. Choose an audio source</b><br>
+- <b>System Audio</b> captures sound directly from the TV. Best quality, no background noise.<br>
+- <b>Microphone</b> uses the device microphone. Can pick up room noise and is less accurate.
+<br><br>
+
+<b>2. Choose the Spoken language</b><br>
+The language being spoken on screen (for example, English).
+<br><br>
+
+<b>3. Choose the Subtitle language</b><br>
+The language you want subtitles to appear in (for example, Polish).
+<br><br>
+
+<b>Example:</b> Watching an English show and want Polish subtitles? Set <i>Spoken language</i> to English and <i>Subtitle language</i> to Polish.
+<br><br>
+
+<b>4. Press Start Subtitles</b><br>
+The app will ask for permissions, then subtitles will appear.
+<br><br>
+
+<b>5. Stop anytime</b><br>
+Pull down the notification shade and tap the <b>Stop</b> button.
+<br><br>
+
+<font color="#FF03DAC5"><b>Permissions</b></font><br><br>
+<b>Draw over other apps</b><br>
+Required so subtitles can appear on top of YouTube, live TV, or any other app. Without this, subtitles only appear inside subbub itself.
+<br><br>
+
+<b>Record audio</b><br>
+Android requires this even when capturing system audio. Also used as a fallback when system audio capture is not possible.
+<br><br>
+
+<b>Capture screen / MediaProjection</b><br>
+When using System Audio, Android shows a system dialog asking to allow capture. We use this only for the audio stream, not video recording.
+<br><br>
+
+<font color="#FF03DAC5"><b>What Works</b></font><br><br>
+- <b>Free-to-air TV</b> — best case. Broadcast audio is not blocked.<br>
+- <b>YouTube on Android TV</b> — generally allows audio capture.
+<br><br>
+
+<font color="#FF03DAC5"><b>What Does Not Work</b></font><br><br>
+- <b>Netflix, Disney+, Spotify</b> — block audio capture for copyright. Switch to Microphone mode or use a second device.<br>
+- <b>System Audio on some TVs</b> — certain TV manufacturers disable MediaProjection audio capture entirely. If System Audio fails, use Microphone mode.<br>
+- <b>Cheap TV sticks</b> — with less than 2 GB RAM may struggle.<br>
+- <b>Some TV overlays</b> — Sony, TCL, Xiaomi, and Fire TV may block third-party overlays when their apps are in focus. Enable the subbub Accessibility Service for the most reliable overlay.
+<br><br>
+
+<font color="#FF03DAC5"><b>Troubleshooting</b></font><br><br>
+<b>Subtitles stop when I switch to YouTube or another app</b><br>
+If you are using <b>Microphone</b> mode, subbub runs in the background and should continue. Make sure the notification shows "subbub - Listening via microphone...". If it stops, your TV may be killing background services aggressively.
+<br><br>
+Fixes:<br>
+- Enable <i>Settings - Accessibility - subbub Subtitles</i>. The Accessibility Service runs with system priority and cannot be killed.<br>
+- Go to <i>Settings - Apps - subbub - Battery</i> and set it to <b>Unrestricted</b> or <b>Don't optimise</b>.<br>
+- Some TVs have a <i>Background process limit</i> in Developer Options — set it to Standard limit.
+<br><br>
+
+<b>System Audio mode does not capture anything</b><br>
+System Audio uses Android's MediaProjection API. Some TV manufacturers (notably Xiaomi, Fire TV, and certain Sony models) disable or restrict this API.<br><br>
+Check:<br>
+- Did you tap <b>Allow</b> on the system "Start recording or casting?" dialog?<br>
+- Is the app you are watching known to block capture? (Netflix, Disney+, Spotify always block it.)<br>
+- Try Microphone mode instead — it works on every device.
+<br><br>
+
+<b>Subtitles never appear</b><br>
+Make sure all permissions are granted:<br>
+- Draw over other apps<br>
+- Microphone<br>
+- Screen capture (for System Audio mode)<br><br>
+If any were denied, go to <i>Settings - Apps - subbub - Permissions</i> and enable them manually.
+<br><br>
+
+<font color="#FF03DAC5"><b>Speech and Translation Models</b></font><br><br>
+subbub uses the open-source Vosk speech-recognition engine for both Microphone and System Audio modes. The first time you use a spoken language, a small model (about 40-50 MB) is downloaded over Wi-Fi. Translation models are also downloaded once per language pair. After that, everything works offline.
+<br><br>
+
+<font color="#FF03DAC5"><b>Author</b></font><br>
+subbub was created by Jason Jordan.
+]]>

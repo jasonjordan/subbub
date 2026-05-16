@@ -14,7 +14,12 @@ class HelpActivity : AppCompatActivity() {
         binding = ActivityHelpBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val html = getString(R.string.help_text)
+        val html = resources.openRawResource(R.raw.help_text)
+            .bufferedReader()
+            .use { it.readText() }
+            .removePrefix("<![CDATA[\n")
+            .removeSuffix("]]>\n")
+
         binding.helpText.text = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
         } else {
