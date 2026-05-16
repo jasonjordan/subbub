@@ -138,7 +138,7 @@ class SpeechRecognitionService : LifecycleService() {
             audioSource = RawAudioSpeechSource(
                 scope = lifecycleScope,
                 onText = { processText(it) },
-                onPartial = { showSubtitle(it) },
+                onPartial = { /* Don't show untranslated partials */ },
                 onError = { err ->
                     updateNotification("subbub — $err")
                 }
@@ -177,7 +177,7 @@ class SpeechRecognitionService : LifecycleService() {
             audioSource = RawAudioSpeechSource(
                 scope = lifecycleScope,
                 onText = { processText(it) },
-                onPartial = { showSubtitle(it) },
+                onPartial = { /* Don't show untranslated partials */ },
                 onError = { err ->
                     updateNotification("subbub — $err")
                 }
