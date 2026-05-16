@@ -185,7 +185,7 @@ class SpeechRecognitionService : LifecycleService() {
             )
 
             val started = audioSource?.startSystemAudio(
-                mediaProjection = mediaProjection!!,
+                projection = mediaProjection!!,
                 modelPath = modelPath,
                 onSilenceDetected = {
                     Log.w(TAG, "System audio silent — app may block capture. Falling back to microphone.")

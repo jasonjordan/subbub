@@ -107,7 +107,6 @@ class AudioCaptureManager {
         val config = AudioPlaybackCaptureConfiguration.Builder(projection)
             .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
             .addMatchingUsage(AudioAttributes.USAGE_GAME)
-            .addMatchingUsage(AudioAttributes.USAGE_MOVIE)
             .addMatchingUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
             .addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
             .build()
