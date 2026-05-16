@@ -2,6 +2,8 @@
     <string name="app_name">subbub</string>
     <string name="app_author">Jason Jordan</string>
     <string name="supported_versions">Requires Android TV / Google TV 13 or later</string>
+    <string name="accessibility_service_label">subbub Subtitles</string>
+    <string name="accessibility_service_description">Display real-time translated subtitles over any app using the system accessibility overlay. More reliable than the standard overlay permission on Android TV.</string>
     <string name="help_text">
 <![CDATA[
 <font color="#FF03DAC5"><b>What is subbub?</b></font><br>
@@ -65,7 +67,9 @@ When using System Audio, Android shows a system dialog asking to allow capture. 
 <b>Subtitles disappear when switching apps</b><br>
 Some Android TV manufacturers block third-party overlays when their launcher or video apps are in focus, even with the Draw over other apps permission granted. This is a system restriction.
 <br><br>
-Workarounds:<br>
+<b>Best fix:</b> Enable the subbub Accessibility Service. Go to <i>Settings → Accessibility → subbub Subtitles</i> and turn it on. Accessibility overlays are granted higher priority by Android and work reliably across all TV brands.
+<br><br>
+Other workarounds:<br>
 &#8226; Return to subbub periodically to check subtitles.<br>
 &#8226; Use a second Android device (phone or tablet) running subbub in Microphone mode, placed near the TV speakers.<br>
 &#8226; On some TVs, enabling <i>Developer Options → Disable HW overlays</i> may help.
@@ -77,6 +81,8 @@ Make sure all three permissions are granted:<br>
 &#8226; Microphone<br>
 &#8226; Screen capture (for System Audio mode)<br><br>
 If any were denied, go to <i>Settings → Apps → subbub → Permissions</i> and enable them manually.
+<br><br>
+For the most reliable experience, also enable <i>Settings → Accessibility → subbub Subtitles</i>.
 <br><br>
 
 <font color="#FF03DAC5"><b>Speech & Translation Models</b></font><br><br>

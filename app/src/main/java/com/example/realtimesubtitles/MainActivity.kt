@@ -85,6 +85,17 @@ class MainActivity : AppCompatActivity() {
         setupSpinners()
         setupButtons()
         observeSubtitles()
+        checkAccessibilityService()
+    }
+
+    private fun checkAccessibilityService() {
+        if (!SubtitleAccessibilityService.isEnabled(this)) {
+            Toast.makeText(
+                this,
+                "Tip: Enable subbub in Settings > Accessibility for more reliable subtitles on Android TV",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     override fun onStart() {

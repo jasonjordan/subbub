@@ -17,9 +17,9 @@ import android.widget.TextView
  * Manages a system overlay window that displays subtitles on top of other apps.
  * Requires SYSTEM_ALERT_WINDOW permission.
  *
- * Note: Android TV OEMs vary in overlay support. Some block third-party overlays
- * when their launcher is active. We use enhanced flags and a re-attach watchdog
- * to maximise compatibility.
+ * This is used as a fallback when the AccessibilityService is not enabled.
+ * The AccessibilityService (SubtitleAccessibilityService) provides a much more
+ * reliable overlay on Android TV via TYPE_ACCESSIBILITY_OVERLAY.
  */
 class OverlayManager(private val context: Context) {
 
@@ -38,7 +38,14 @@ class OverlayManager(private val context: Context) {
     val canOverlay: Boolean
         get() = Settings.canDrawOverlays(context)
 
+    val isAccessibilityPreferred: Boolean
+        get() = SubtitleAccessibilityService.isEnabled(context)
+
     fun show(text: String) {
+        if (isAccessibilityPreferred) {
+            // Accessibility service handles the overlay; skip here
+            return
+        }
         if (!canOverlay) {
             Log.w(TAG, "Cannot draw overlays — permission not granted")
             return
@@ -56,8 +63,6 @@ class OverlayManager(private val context: Context) {
             overlayView?.bringToFront()
         }
 
-        // Re-attach watchdog: Android TV OEMs sometimes detach overlays
-        // when the creating app leaves focus. Re-check shortly.
         handler.removeCallbacks(reattachRunnable)
         handler.postDelayed(reattachRunnable, 500)
     }
@@ -85,7 +90,7 @@ class OverlayManager(private val context: Context) {
     }
 
     private val reattachRunnable = Runnable {
-        if (overlayView == null && lastText.isNotBlank() && canOverlay) {
+        if (overlayView == null && lastText.isNotBlank() && canOverlay && !isAccessibilityPreferred) {
             Log.d(TAG, "Re-attaching overlay (watchdog)")
             ensureViewAdded()
             overlayText?.text = lastText
@@ -98,7 +103,6 @@ class OverlayManager(private val context: Context) {
             try {
                 overlayView?.parent ?: throw IllegalStateException("Detached")
             } catch (_: Exception) {
-                // Previously attached but now orphaned; rebuild
                 overlayView = null
                 overlayText = null
             }
