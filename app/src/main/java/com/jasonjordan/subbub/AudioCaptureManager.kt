@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -88,8 +89,15 @@ class AudioCaptureManager {
      *
      * TV audio is typically 48kHz stereo. We capture at native rate and downmix/resample
      * to 16kHz mono for Vosk.
+     *
+     * If the captured audio is silent for more than [silenceThresholdMs], [onSilenceDetected]
+     * is called so the caller can fall back to microphone mode.
      */
-    fun startSystemAudio(projection: MediaProjection, onPcmData: (ByteArray) -> Unit): Boolean {
+    fun startSystemAudio(
+        projection: MediaProjection,
+        onPcmData: (ByteArray) -> Unit,
+        onSilenceDetected: () -> Unit = {}
+    ): Boolean {
         if (!isSystemAudioSupported()) {
             Log.w(TAG, "System audio capture requires Android 10+")
             return false
@@ -99,6 +107,8 @@ class AudioCaptureManager {
         val config = AudioPlaybackCaptureConfiguration.Builder(projection)
             .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
             .addMatchingUsage(AudioAttributes.USAGE_GAME)
+            .addMatchingUsage(AudioAttributes.USAGE_MOVIE)
+            .addMatchingUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
             .addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
             .build()
 
@@ -133,17 +143,30 @@ class AudioCaptureManager {
         captureJob = scope.launch {
             val stereoBuffer = ByteArray(minBuffer)
             var logCounter = 0
+            var silentFrames = 0
+            val silenceThresholdFrames = 250 // ~5 seconds of zero audio
+
             while (isActive) {
                 val read = audioRecord?.read(stereoBuffer, 0, stereoBuffer.size) ?: -1
                 if (read > 0) {
                     val mono16k = downsample48kStereoTo16kMono(stereoBuffer.copyOf(read))
                     if (mono16k.isNotEmpty()) {
-                        // Log audio level every ~2 seconds for debugging
                         logCounter++
                         if (logCounter >= 100) {
                             logCounter = 0
                             val rms = calculateRms(mono16k)
-                            Log.d(TAG, "Audio RMS level: $rms (samples=${mono16k.size / 2})")
+                            Log.d(TAG, "System audio RMS level: $rms (samples=${mono16k.size / 2})")
+
+                            if (rms < 1.0) {
+                                silentFrames++
+                                if (silentFrames >= silenceThresholdFrames) {
+                                    Log.w(TAG, "System audio is silent for 5+ seconds. The app may block capture.")
+                                    onSilenceDetected()
+                                    break
+                                }
+                            } else {
+                                silentFrames = 0
+                            }
                         }
                         onPcmData(mono16k)
                     }

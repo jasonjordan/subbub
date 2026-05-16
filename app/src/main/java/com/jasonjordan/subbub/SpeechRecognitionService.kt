@@ -184,7 +184,17 @@ class SpeechRecognitionService : LifecycleService() {
                 }
             )
 
-            val started = audioSource?.startSystemAudio(mediaProjection!!, modelPath) ?: false
+            val started = audioSource?.startSystemAudio(
+                mediaProjection = mediaProjection!!,
+                modelPath = modelPath,
+                onSilenceDetected = {
+                    Log.w(TAG, "System audio silent — app may block capture. Falling back to microphone.")
+                    updateNotification("subbub — App blocks audio capture. Switching to microphone...")
+                    audioSource?.release()
+                    audioSource = null
+                    startMicMode()
+                }
+            ) ?: false
             if (!started) {
                 updateNotification("subbub — System audio failed, falling back to microphone")
                 audioSource?.release()

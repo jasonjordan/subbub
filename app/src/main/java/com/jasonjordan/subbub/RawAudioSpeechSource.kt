@@ -4,9 +4,7 @@ import android.media.projection.MediaProjection
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Unified speech-to-text using raw AudioRecord + Vosk.
@@ -41,13 +39,21 @@ class RawAudioSpeechSource(
 
     /**
      * Start listening from system audio via MediaProjection.
+     * [onSilenceDetected] is called if the system audio stream is silent
+     * for several seconds (the app may block capture).
      */
-    fun startSystemAudio(projection: MediaProjection, modelPath: String): Boolean {
+    fun startSystemAudio(
+        projection: MediaProjection,
+        modelPath: String,
+        onSilenceDetected: () -> Unit = {}
+    ): Boolean {
         vosk = VoskSpeechEngine(modelPath)
         vosk?.startListening()
-        return capture.startSystemAudio(projection) { pcm ->
-            feedVosk(pcm)
-        }
+        return capture.startSystemAudio(
+            projection = projection,
+            onPcmData = { pcm -> feedVosk(pcm) },
+            onSilenceDetected = onSilenceDetected
+        )
     }
 
     fun stop() {
