@@ -25,8 +25,7 @@ class SpeechRecognitionService : LifecycleService() {
     private var overlayManager: OverlayManager? = null
     private var translationManager: TranslationManager? = null
 
-    private var micSource: MicSpeechSource? = null
-    private var systemSource: SystemAudioSource? = null
+    private var audioSource: RawAudioSpeechSource? = null
     private var mediaProjection: MediaProjection? = null
 
     private var isListening = false
@@ -106,11 +105,8 @@ class SpeechRecognitionService : LifecycleService() {
         SubtitleState.isListening.value = false
         overlayWatchdogJob?.cancel()
         overlayWatchdogJob = null
-        micSource?.stop()
-        micSource = null
-        systemSource?.stop()
-        systemSource?.release()
-        systemSource = null
+        audioSource?.release()
+        audioSource = null
         mediaProjection?.stop()
         mediaProjection = null
         overlayManager?.remove()
@@ -137,36 +133,46 @@ class SpeechRecognitionService : LifecycleService() {
     }
 
     private fun startMicMode() {
-        isListening = true
-        SubtitleState.isListening.value = true
-        updateNotification("subbub — Listening via microphone...")
-        startOverlayWatchdog()
+        lifecycleScope.launch {
+            val lang = currentLanguage.takeIf { it.isNotBlank() } ?: "en"
+            val modelPath = prepareModel(lang) ?: run {
+                updateNotification("subbub — Speech model unavailable")
+                return@launch
+            }
 
-        micSource = MicSpeechSource(
-            context = this,
-            scope = lifecycleScope,
-            onText = { processText(it) },
-            onPartial = { showSubtitle(it, isPartial = true) }
-        )
-        micSource?.start(currentLanguage)
+            isListening = true
+            SubtitleState.isListening.value = true
+            updateNotification("subbub — Listening via microphone...")
+            startOverlayWatchdog()
+
+            audioSource = RawAudioSpeechSource(
+                scope = lifecycleScope,
+                onText = { processText(it) },
+                onPartial = { showSubtitle(it, isPartial = true) },
+                onError = { err ->
+                    updateNotification("subbub — $err")
+                }
+            )
+
+            val started = audioSource?.startMicrophone(modelPath) ?: false
+            if (!started) {
+                updateNotification("subbub — Microphone capture failed")
+                isListening = false
+                SubtitleState.isListening.value = false
+            }
+        }
     }
 
     private fun startSystemAudioMode() {
         if (mediaProjection == null) {
+            updateNotification("subbub — No projection, falling back to microphone")
             startMicMode()
             return
         }
         lifecycleScope.launch {
             val lang = currentLanguage.takeIf { it.isNotBlank() } ?: "en"
-            val modelPath = if (ModelManager.isModelAvailable(applicationContext, lang)) {
-                ModelManager.modelDir(applicationContext, lang).absolutePath
-            } else {
-                updateNotification("subbub — Downloading speech model...")
-                ModelManager.prepareModel(applicationContext, lang)
-            }
-
-            if (modelPath == null) {
-                updateNotification("subbub — Model unavailable, falling back to microphone")
+            val modelPath = prepareModel(lang) ?: run {
+                updateNotification("subbub — Speech model unavailable, falling back to microphone")
                 startMicMode()
                 return@launch
             }
@@ -176,13 +182,31 @@ class SpeechRecognitionService : LifecycleService() {
             updateNotification("subbub — Capturing system audio...")
             startOverlayWatchdog()
 
-            systemSource = SystemAudioSource(
-                modelPath = modelPath,
+            audioSource = RawAudioSpeechSource(
                 scope = lifecycleScope,
                 onText = { processText(it) },
-                onPartial = { showSubtitle(it, isPartial = true) }
+                onPartial = { showSubtitle(it, isPartial = true) },
+                onError = { err ->
+                    updateNotification("subbub — $err")
+                }
             )
-            systemSource?.start(mediaProjection!!)
+
+            val started = audioSource?.startSystemAudio(mediaProjection!!, modelPath) ?: false
+            if (!started) {
+                updateNotification("subbub — System audio failed, falling back to microphone")
+                audioSource?.release()
+                audioSource = null
+                startMicMode()
+            }
+        }
+    }
+
+    private suspend fun prepareModel(lang: String): String? {
+        return if (ModelManager.isModelAvailable(applicationContext, lang)) {
+            ModelManager.modelDir(applicationContext, lang).absolutePath
+        } else {
+            updateNotification("subbub — Downloading speech model...")
+            ModelManager.prepareModel(applicationContext, lang)
         }
     }
 
