@@ -37,6 +37,7 @@ class SpeechRecognitionService : LifecycleService() {
         const val NOTIFICATION_ID = 1
         const val EXTRA_AUDIO_MODE = "audio_mode"
         const val EXTRA_LANGUAGE = "language"
+        const val EXTRA_TARGET_LANGUAGE = "target_language"
         const val EXTRA_PROJECTION_DATA = "projection_data"
         const val EXTRA_PROJECTION_RESULT_CODE = "projection_result_code"
         const val ACTION_STOP = "com.example.realtimesubtitles.ACTION_STOP"
@@ -73,7 +74,9 @@ class SpeechRecognitionService : LifecycleService() {
 
         audioMode = intent?.getStringExtra(EXTRA_AUDIO_MODE) ?: AUDIO_MODE_MIC
         currentLanguage = intent?.getStringExtra(EXTRA_LANGUAGE) ?: ""
+        val targetLang = intent?.getStringExtra(EXTRA_TARGET_LANGUAGE) ?: "en"
         SubtitleState.sourceLanguage.value = currentLanguage
+        SubtitleState.targetLanguage.value = targetLang
 
         if (audioMode == AUDIO_MODE_SYSTEM) {
             val resultCode = intent?.getIntExtra(EXTRA_PROJECTION_RESULT_CODE, 0) ?: 0
@@ -88,7 +91,6 @@ class SpeechRecognitionService : LifecycleService() {
                 mediaProjection = mpManager.getMediaProjection(resultCode, data)
                 startSystemAudioMode()
             } else {
-                // Fallback to mic if projection data missing
                 startMicMode()
             }
         } else {
@@ -167,12 +169,13 @@ class SpeechRecognitionService : LifecycleService() {
 
     private fun processText(text: String) {
         val sourceLang = SubtitleState.sourceLanguage.value
-        val needsTranslation = sourceLang.isNotBlank() && !sourceLang.startsWith("en")
+        val targetLang = SubtitleState.targetLanguage.value
+        val needsTranslation = sourceLang.isNotBlank() && targetLang.isNotBlank() && sourceLang != targetLang
 
         if (needsTranslation) {
             lifecycleScope.launch {
                 val translated = withContext(Dispatchers.IO) {
-                    translationManager?.translate(text, sourceLang, "en") ?: text
+                    translationManager?.translate(text, sourceLang, targetLang) ?: text
                 }
                 showSubtitle(translated, isPartial = false)
                 scheduleClear(translated)
@@ -207,7 +210,7 @@ class SpeechRecognitionService : LifecycleService() {
                 "Live Subtitles",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "subbub by Jason Jordan — Translating audio into English subtitles"
+                description = "subbub by Jason Jordan — Real-time translated subtitles"
             }
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)

@@ -55,7 +55,6 @@ class MainActivity : AppCompatActivity() {
     private val overlaySettingsLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        // User returned from overlay settings
         if (Settings.canDrawOverlays(this)) {
             tryStartAfterPermissions()
         } else {
@@ -110,27 +109,61 @@ class MainActivity : AppCompatActivity() {
         audioAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.audioSourceSpinner.adapter = audioAdapter
 
-        // Languages
+        // Languages available for both source and target
         val languages = listOf(
-            "Auto-detect / English" to "en",
+            "English" to "en",
             "Spanish" to "es",
             "French" to "fr",
             "German" to "de",
             "Italian" to "it",
             "Portuguese" to "pt",
             "Russian" to "ru",
-            "Chinese" to "zh"
+            "Chinese" to "zh",
+            "Polish" to "pl",
+            "Japanese" to "ja",
+            "Korean" to "ko",
+            "Arabic" to "ar",
+            "Hindi" to "hi",
+            "Dutch" to "nl",
+            "Turkish" to "tr",
+            "Vietnamese" to "vi",
+            "Czech" to "cs",
+            "Greek" to "el",
+            "Hebrew" to "he",
+            "Romanian" to "ro",
+            "Swedish" to "sv",
+            "Hungarian" to "hu"
         )
-        val langAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages.map { it.first })
-        langAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.languageSpinner.adapter = langAdapter
 
-        binding.languageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        // Source language (what is being spoken)
+        val sourceAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages.map { it.first })
+        sourceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.sourceLanguageSpinner.adapter = sourceAdapter
+        binding.sourceLanguageSpinner.setSelection(0) // English default
+
+        binding.sourceLanguageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 SubtitleState.sourceLanguage.value = languages[position].second
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+
+        // Target language (what subtitles should show)
+        val targetAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages.map { it.first })
+        targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.targetLanguageSpinner.adapter = targetAdapter
+        binding.targetLanguageSpinner.setSelection(0) // English default
+
+        binding.targetLanguageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                SubtitleState.targetLanguage.value = languages[position].second
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Set initial state
+        SubtitleState.sourceLanguage.value = languages[0].second
+        SubtitleState.targetLanguage.value = languages[0].second
     }
 
     private fun setupButtons() {
@@ -166,7 +199,8 @@ class MainActivity : AppCompatActivity() {
         binding.startButton.visibility = if (listening) View.GONE else View.VISIBLE
         binding.helpButton.visibility = if (listening) View.GONE else View.VISIBLE
         binding.stopButton.visibility = if (listening) View.VISIBLE else View.GONE
-        binding.languageSpinner.isEnabled = !listening
+        binding.sourceLanguageSpinner.isEnabled = !listening
+        binding.targetLanguageSpinner.isEnabled = !listening
         binding.audioSourceSpinner.isEnabled = !listening
     }
 
@@ -183,7 +217,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // 2. Microphone permission (required for both modes on modern Android)
+        // 2. Microphone permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED
         ) {
@@ -206,10 +240,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startServiceWithProjection(data: Intent, resultCode: Int) {
-        val lang = SubtitleState.sourceLanguage.value
         val intent = Intent(this, SpeechRecognitionService::class.java).apply {
             putExtra(SpeechRecognitionService.EXTRA_AUDIO_MODE, SpeechRecognitionService.AUDIO_MODE_SYSTEM)
-            putExtra(SpeechRecognitionService.EXTRA_LANGUAGE, lang)
+            putExtra(SpeechRecognitionService.EXTRA_LANGUAGE, SubtitleState.sourceLanguage.value)
+            putExtra(SpeechRecognitionService.EXTRA_TARGET_LANGUAGE, SubtitleState.targetLanguage.value)
             putExtra(SpeechRecognitionService.EXTRA_PROJECTION_DATA, data)
             putExtra(SpeechRecognitionService.EXTRA_PROJECTION_RESULT_CODE, resultCode)
         }
@@ -219,10 +253,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startServiceDirect(audioMode: String) {
-        val lang = SubtitleState.sourceLanguage.value
         val intent = Intent(this, SpeechRecognitionService::class.java).apply {
             putExtra(SpeechRecognitionService.EXTRA_AUDIO_MODE, audioMode)
-            putExtra(SpeechRecognitionService.EXTRA_LANGUAGE, lang)
+            putExtra(SpeechRecognitionService.EXTRA_LANGUAGE, SubtitleState.sourceLanguage.value)
+            putExtra(SpeechRecognitionService.EXTRA_TARGET_LANGUAGE, SubtitleState.targetLanguage.value)
         }
         ContextCompat.startForegroundService(this, intent)
         SubtitleState.isListening.value = true

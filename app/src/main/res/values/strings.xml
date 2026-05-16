@@ -5,7 +5,7 @@
     <string name="help_text">
 <![CDATA[
 What is subbub?
-subbub listens to the audio of whatever you are watching and translates it into English subtitles in real time. You can place subtitles directly over your screen so you can keep watching while reading.
+subbub listens to the audio of whatever you are watching and translates it into subtitles in real time in the language you choose. You can place subtitles directly over your screen so you can keep watching while reading.
 
 Supported Devices
 subbub works only on Android TV and Google TV running Android 13, 14 or 15. It will not install on older versions.
@@ -15,11 +15,15 @@ How to use
    • System Audio — captures the sound coming directly from the TV. This avoids background noise and gives the best results.
    • Microphone — uses the device microphone as a fallback. This can pick up room noise and is less accurate.
 
-2. Choose the language being spoken on screen.
+2. Choose the Spoken language — the language being spoken on screen (e.g., English).
 
-3. Press Start Subtitles. The app will ask for the permissions explained below, then subtitles will appear.
+3. Choose the Subtitle language — the language you want the subtitles to appear in (e.g., Polish).
 
-4. You can stop subtitles at any time by pulling down the notification shade and tapping the Stop button.
+   Example: If you are watching an English TV show and you want Polish subtitles, set Spoken language to English and Subtitle language to Polish.
+
+4. Press Start Subtitles. The app will ask for the permissions explained below, then subtitles will appear.
+
+5. You can stop subtitles at any time by pulling down the notification shade and tapping the Stop button.
 
 Permissions and why they are needed
 
@@ -50,7 +54,10 @@ Overlay behaviour
   Subtitles are drawn in a system overlay window. On most Android TV and Google TV devices this works well, but some older or heavily customised TV interfaces may ignore overlay windows. If subtitles do not appear over other apps, they will still be visible when you return to subbub.
 
 Speech models
-  The first time you use a language, subbub downloads a small on-device speech model over Wi-Fi. After that, the model is stored on your device and works offline.
+  The first time you use a spoken language, subbub downloads a small on-device speech model over Wi-Fi. After that, the model is stored on your device and works offline.
+
+Translation models
+  The first time you translate to a new subtitle language, subbub downloads a small translation model over Wi-Fi. After that, the model is stored on your device and works offline.
 
 Author
   subbub was created by Jason Jordan.

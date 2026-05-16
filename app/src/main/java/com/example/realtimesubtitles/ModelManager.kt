@@ -26,7 +26,8 @@ object ModelManager {
         "pt" -> "https://alphacephei.com/vosk/models/vosk-model-small-pt-0.3.zip"
         "ru" -> "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip"
         "zh" -> "https://alphacephei.com/vosk/models/vosk-model-small-cn-0.22.zip"
-        "ja" -> null // Vosk small model for Japanese may not exist; fallback to mic
+        "pl" -> "https://alphacephei.com/vosk/models/vosk-model-small-pl-0.22.zip"
+        "ja" -> null
         "ko" -> null
         "ar" -> null
         "hi" -> null

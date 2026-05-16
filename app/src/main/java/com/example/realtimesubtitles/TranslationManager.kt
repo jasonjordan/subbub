@@ -64,6 +64,31 @@ class TranslationManager(context: Context) {
             "ko" -> TranslateLanguage.KOREAN
             "ar" -> TranslateLanguage.ARABIC
             "hi" -> TranslateLanguage.HINDI
+            "pl" -> TranslateLanguage.POLISH
+            "nl" -> TranslateLanguage.DUTCH
+            "tr" -> TranslateLanguage.TURKISH
+            "vi" -> TranslateLanguage.VIETNAMESE
+            "th" -> TranslateLanguage.THAI
+            "id" -> TranslateLanguage.INDONESIAN
+            "cs" -> TranslateLanguage.CZECH
+            "el" -> TranslateLanguage.GREEK
+            "he" -> TranslateLanguage.HEBREW
+            "ro" -> TranslateLanguage.ROMANIAN
+            "sv" -> TranslateLanguage.SWEDISH
+            "hu" -> TranslateLanguage.HUNGARIAN
+            "da" -> TranslateLanguage.DANISH
+            "fi" -> TranslateLanguage.FINNISH
+            "no" -> TranslateLanguage.NORWEGIAN
+            "uk" -> TranslateLanguage.UKRAINIAN
+            "bg" -> TranslateLanguage.BULGARIAN
+            "hr" -> TranslateLanguage.CROATIAN
+            "sk" -> TranslateLanguage.SLOVAK
+            "sl" -> TranslateLanguage.SLOVENIAN
+            "lt" -> TranslateLanguage.LITHUANIAN
+            "lv" -> TranslateLanguage.LATVIAN
+            "et" -> TranslateLanguage.ESTONIAN
+            "ms" -> TranslateLanguage.MALAY
+            "tl" -> TranslateLanguage.FILIPINO
             else -> null
         }
     }

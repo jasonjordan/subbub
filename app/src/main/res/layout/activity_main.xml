@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout 
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -27,7 +27,7 @@
         android:layout_marginHorizontal="48dp"
         android:layout_marginTop="16dp"
         android:gravity="center"
-        android:text="subbub by Jason Jordan. Select audio source and language, then press Start to see live English subtitles overlaid on your screen."
+        android:text="subbub by Jason Jordan. Select audio source, spoken language, and subtitle language, then press Start."
         android:textColor="@android:color/darker_gray"
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@id/audioSourceSpinner"
@@ -41,21 +41,58 @@
         android:layout_height="48dp"
         android:layout_marginTop="24dp"
         android:background="@android:drawable/btn_dropdown"
-        app:layout_constraintBottom_toTopOf="@id/languageSpinner"
+        app:layout_constraintBottom_toTopOf="@id/sourceLanguageLabel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/descriptionText" />
 
+    <TextView
+        android:id="@+id/sourceLanguageLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Spoken language"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/sourceLanguageSpinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/audioSourceSpinner" />
+
     <Spinner
-        android:id="@+id/languageSpinner"
+        android:id="@+id/sourceLanguageSpinner"
         android:layout_width="300dp"
         android:layout_height="48dp"
+        android:layout_marginTop="4dp"
+        android:background="@android:drawable/btn_dropdown"
+        app:layout_constraintBottom_toTopOf="@id/targetLanguageLabel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sourceLanguageLabel" />
+
+    <TextView
+        android:id="@+id/targetLanguageLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:text="Subtitle language"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/targetLanguageSpinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sourceLanguageSpinner" />
+
+    <Spinner
+        android:id="@+id/targetLanguageSpinner"
+        android:layout_width="300dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="4dp"
         android:background="@android:drawable/btn_dropdown"
         app:layout_constraintBottom_toTopOf="@id/startButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/audioSourceSpinner" />
+        app:layout_constraintTop_toBottomOf="@id/targetLanguageLabel" />
 
     <Button
         android:id="@+id/startButton"
@@ -69,7 +106,7 @@
         app:layout_constraintBottom_toTopOf="@id/helpButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/languageSpinner" />
+        app:layout_constraintTop_toBottomOf="@id/targetLanguageSpinner" />
 
     <Button
         android:id="@+id/helpButton"
