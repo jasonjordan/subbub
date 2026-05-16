@@ -88,7 +88,7 @@ class TranslationManager(context: Context) {
             "lv" -> TranslateLanguage.LATVIAN
             "et" -> TranslateLanguage.ESTONIAN
             "ms" -> TranslateLanguage.MALAY
-            "tl" -> TranslateLanguage.FILIPINO
+            "tl" -> TranslateLanguage.TAGALOG
             else -> null
         }
     }

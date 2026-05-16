@@ -4,14 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#CC000000"
-    android:padding="16dp">
+    android:padding="20dp">
 
     <TextView
         android:id="@+id/overlayText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textColor="@android:color/white"
+        android:shadowColor="#FF000000"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="4"
+        android:textColor="#FFFFFFFF"
         android:textSize="28sp"
         android:textStyle="bold" />
 

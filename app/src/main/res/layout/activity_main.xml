@@ -4,120 +4,147 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#CC000000">
+    android:background="#E6000000">
 
     <TextView
         android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
-        android:textColor="@android:color/white"
-        android:textSize="32sp"
+        android:textColor="#FFFFFFFF"
+        android:textSize="40sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/descriptionText"
+        app:layout_constraintBottom_toTopOf="@id/titleDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <TextView
-        android:id="@+id/descriptionText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="48dp"
-        android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:text="subbub by Jason Jordan. Select audio source, spoken language, and subtitle language, then press Start."
-        android:textColor="@android:color/darker_gray"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@id/audioSourceSpinner"
+    <View
+        android:id="@+id/titleDivider"
+        android:layout_width="80dp"
+        android:layout_height="3dp"
+        android:layout_marginTop="8dp"
+        android:background="#FF03DAC5"
+        app:layout_constraintBottom_toTopOf="@id/descriptionText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titleText" />
 
-    <Spinner
-        android:id="@+id/audioSourceSpinner"
-        android:layout_width="300dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="24dp"
-        android:background="@android:drawable/btn_dropdown"
-        app:layout_constraintBottom_toTopOf="@id/sourceLanguageLabel"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/descriptionText" />
-
     <TextView
-        android:id="@+id/sourceLanguageLabel"
-        android:layout_width="wrap_content"
+        android:id="@+id/descriptionText"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="64dp"
         android:layout_marginTop="16dp"
-        android:text="Spoken language"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/sourceLanguageSpinner"
+        android:gravity="center"
+        android:text="by Jason Jordan"
+        android:textColor="#FF03DAC5"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@id/cardContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/audioSourceSpinner" />
+        app:layout_constraintTop_toBottomOf="@id/titleDivider" />
 
-    <Spinner
-        android:id="@+id/sourceLanguageSpinner"
-        android:layout_width="300dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="4dp"
-        android:background="@android:drawable/btn_dropdown"
-        app:layout_constraintBottom_toTopOf="@id/targetLanguageLabel"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sourceLanguageLabel" />
-
-    <TextView
-        android:id="@+id/targetLanguageLabel"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/cardContainer"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Subtitle language"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/targetLanguageSpinner"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sourceLanguageSpinner" />
-
-    <Spinner
-        android:id="@+id/targetLanguageSpinner"
-        android:layout_width="300dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="4dp"
-        android:background="@android:drawable/btn_dropdown"
+        android:layout_marginHorizontal="80dp"
+        android:layout_marginTop="32dp"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:background="#33FFFFFF"
         app:layout_constraintBottom_toTopOf="@id/startButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/targetLanguageLabel" />
+        app:layout_constraintTop_toBottomOf="@id/descriptionText">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Audio source"
+            android:textColor="#FF03DAC5"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/audioSourceSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="4dp"
+            android:background="@android:drawable/btn_dropdown" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="#22FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spoken language"
+            android:textColor="#FF03DAC5"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/sourceLanguageSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="4dp"
+            android:background="@android:drawable/btn_dropdown" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="#22FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subtitle language"
+            android:textColor="#FF03DAC5"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/targetLanguageSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="4dp"
+            android:background="@android:drawable/btn_dropdown" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/startButton"
-        android:layout_width="200dp"
+        android:layout_width="240dp"
         android:layout_height="60dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="28dp"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:text="Start Subtitles"
         android:textSize="18sp"
+        android:textColor="#FF000000"
+        android:backgroundTint="#FF03DAC5"
         app:layout_constraintBottom_toTopOf="@id/helpButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/targetLanguageSpinner" />
+        app:layout_constraintTop_toBottomOf="@id/cardContainer" />
 
     <Button
         android:id="@+id/helpButton"
-        android:layout_width="200dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="240dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="12dp"
         android:layout_marginBottom="32dp"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:text="Help"
-        android:textSize="18sp"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -133,7 +160,7 @@
         android:focusableInTouchMode="true"
         android:padding="12dp"
         android:text="Stop"
-        android:textColor="@android:color/white"
+        android:textColor="#FFFFFFFF"
         android:textSize="16sp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
@@ -148,7 +175,7 @@
         android:background="#CC000000"
         android:gravity="center"
         android:padding="16dp"
-        android:textColor="@android:color/white"
+        android:textColor="#FFFFFFFF"
         android:textSize="28sp"
         android:textStyle="bold"
         android:visibility="gone"

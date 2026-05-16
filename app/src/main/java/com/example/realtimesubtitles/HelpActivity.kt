@@ -1,6 +1,7 @@
 package com.example.realtimesubtitles
 
 import android.os.Bundle
+import android.text.Html
 import androidx.appcompat.app.AppCompatActivity
 import com.example.realtimesubtitles.databinding.ActivityHelpBinding
 
@@ -12,6 +13,14 @@ class HelpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityHelpBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val html = getString(R.string.help_text)
+        binding.helpText.text = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            @Suppress("DEPRECATION")
+            Html.fromHtml(html)
+        }
 
         binding.helpBackButton.setOnClickListener {
             finish()
