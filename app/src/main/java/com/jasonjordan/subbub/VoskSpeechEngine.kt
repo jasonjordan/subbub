@@ -1,4 +1,4 @@
-package com.example.realtimesubtitles
+package com.jasonjordan.subbub
 
 import org.vosk.Model
 import org.vosk.Recognizer

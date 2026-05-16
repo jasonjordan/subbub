@@ -1,4 +1,4 @@
-package com.example.realtimesubtitles
+package com.jasonjordan.subbub
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo

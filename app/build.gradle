@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.realtimesubtitles'
+    namespace 'com.jasonjordan.subbub'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.realtimesubtitles"
+        applicationId "com.jasonjordan.subbub"
         minSdk 31
         targetSdk 34
         versionCode 1

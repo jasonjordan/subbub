@@ -1,9 +1,9 @@
-package com.example.realtimesubtitles
+package com.jasonjordan.subbub
 
 import android.os.Bundle
 import android.text.Html
 import androidx.appcompat.app.AppCompatActivity
-import com.example.realtimesubtitles.databinding.ActivityHelpBinding
+import com.jasonjordan.subbub.databinding.ActivityHelpBinding
 
 class HelpActivity : AppCompatActivity() {
 

@@ -1,4 +1,4 @@
-package com.example.realtimesubtitles
+package com.jasonjordan.subbub
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -42,7 +42,7 @@ class SpeechRecognitionService : LifecycleService() {
         const val EXTRA_TARGET_LANGUAGE = "target_language"
         const val EXTRA_PROJECTION_DATA = "projection_data"
         const val EXTRA_PROJECTION_RESULT_CODE = "projection_result_code"
-        const val ACTION_STOP = "com.example.realtimesubtitles.ACTION_STOP"
+        const val ACTION_STOP = "com.jasonjordan.subbub.ACTION_STOP"
         const val AUDIO_MODE_SYSTEM = "system"
         const val AUDIO_MODE_MIC = "mic"
         const val TAG = "SpeechRecService"

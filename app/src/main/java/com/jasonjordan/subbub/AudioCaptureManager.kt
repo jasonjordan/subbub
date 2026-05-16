@@ -1,4 +1,4 @@
-package com.example.realtimesubtitles
+package com.jasonjordan.subbub
 
 import android.media.AudioAttributes
 import android.media.AudioFormat

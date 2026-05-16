@@ -1,4 +1,4 @@
-package com.example.realtimesubtitles
+package com.jasonjordan.subbub
 
 import kotlinx.coroutines.flow.MutableStateFlow
 
