@@ -59,34 +59,39 @@ When using System Audio, Android shows a system dialog asking to allow capture. 
 
 <font color="#FF03DAC5"><b>What Does Not Work</b></font><br><br>
 &#8226; <b>Netflix, Disney+, Spotify</b> — block audio capture for copyright. Switch to Microphone mode or use a second device.<br>
+&#8226; <b>System Audio on some TVs</b> — certain TV manufacturers disable MediaProjection audio capture entirely. If System Audio fails, use Microphone mode.<br>
 &#8226; <b>Cheap TV sticks</b> — with less than 2 GB RAM may struggle.<br>
-&#8226; <b>Some TV overlays</b> — Sony, TCL, Xiaomi, and Fire TV may block third-party overlays when their apps are in focus. Use a second device as a workaround.
+&#8226; <b>Some TV overlays</b> — Sony, TCL, Xiaomi, and Fire TV may block third-party overlays when their apps are in focus. Enable the subbub Accessibility Service for the most reliable overlay.
 <br><br>
 
 <font color="#FF03DAC5"><b>Troubleshooting</b></font><br><br>
-<b>Subtitles disappear when switching apps</b><br>
-Some Android TV manufacturers block third-party overlays when their launcher or video apps are in focus, even with the Draw over other apps permission granted. This is a system restriction.
+<b>Subtitles stop when I switch to YouTube or another app</b><br>
+If you are using <b>Microphone</b> mode, subbub runs in the background and should continue. Make sure the notification shows "subbub — Listening via microphone...". If it stops, your TV may be killing background services aggressively.
 <br><br>
-<b>Best fix:</b> Enable the subbub Accessibility Service. Go to <i>Settings → Accessibility → subbub Subtitles</i> and turn it on. Accessibility overlays are granted higher priority by Android and work reliably across all TV brands.
+Fixes:<br>
+&#8226; Enable <i>Settings → Accessibility → subbub Subtitles</i>. The Accessibility Service runs with system priority and cannot be killed.<br>
+&#8226; Go to <i>Settings → Apps → subbub → Battery</i> and set it to <b>Unrestricted</b> or <b>Don't optimise</b>.<br>
+&#8226; Some TVs have a <i>Background process limit</i> in Developer Options — set it to Standard limit.
 <br><br>
-Other workarounds:<br>
-&#8226; Return to subbub periodically to check subtitles.<br>
-&#8226; Use a second Android device (phone or tablet) running subbub in Microphone mode, placed near the TV speakers.<br>
-&#8226; On some TVs, enabling <i>Developer Options → Disable HW overlays</i> may help.
+
+<b>System Audio mode does not capture anything</b><br>
+System Audio uses Android's MediaProjection API. Some TV manufacturers (notably Xiaomi, Fire TV, and certain Sony models) disable or restrict this API.<br><br>
+Check:<br>
+&#8226; Did you tap <b>Allow</b> on the system "Start recording or casting?" dialog?<br>
+&#8226; Is the app you are watching known to block capture? (Netflix, Disney+, Spotify always block it.)<br>
+&#8226; Try Microphone mode instead — it works on every device.
 <br><br>
 
 <b>Subtitles never appear</b><br>
-Make sure all three permissions are granted:<br>
+Make sure all permissions are granted:<br>
 &#8226; Draw over other apps<br>
 &#8226; Microphone<br>
 &#8226; Screen capture (for System Audio mode)<br><br>
 If any were denied, go to <i>Settings → Apps → subbub → Permissions</i> and enable them manually.
 <br><br>
-For the most reliable experience, also enable <i>Settings → Accessibility → subbub Subtitles</i>.
-<br><br>
 
 <font color="#FF03DAC5"><b>Speech & Translation Models</b></font><br><br>
-The first time you use a spoken or subtitle language, subbub downloads a small on-device model over Wi-Fi (about 40–50 MB). After that, it works offline.
+subbub uses the open-source Vosk speech-recognition engine for both Microphone and System Audio modes. The first time you use a spoken language, a small model (about 40–50 MB) is downloaded over Wi-Fi. Translation models are also downloaded once per language pair. After that, everything works offline.
 <br><br>
 
 <font color="#FF03DAC5"><b>Author</b></font><br>
