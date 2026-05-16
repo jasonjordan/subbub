@@ -158,5 +158,17 @@ object ModelManager {
                 }
             }
         }
+
+        // Vosk model zips contain a nested top-level folder (e.g. vosk-model-small-en-us-0.15).
+        // If the destination contains exactly one subdirectory and no files directly inside it,
+        // hoist the contents up so Vosk can find the model files at the expected path.
+        val children = destDir.listFiles()
+        if (children != null && children.size == 1 && children[0].isDirectory) {
+            val nested = children[0]
+            val tempDir = File(destDir.parentFile, "${destDir.name}_temp")
+            nested.renameTo(tempDir)
+            destDir.deleteRecursively()
+            tempDir.renameTo(destDir)
+        }
     }
 }
