@@ -87,8 +87,8 @@ class AudioCaptureManager {
     /**
      * Start capturing system audio via MediaProjection. Returns true if started successfully.
      *
-     * TV audio is typically 48kHz stereo. We capture at native rate and downmix/resample
-     * to 16kHz mono for Vosk.
+     * We request 16kHz mono — Android handles resampling/downmixing from the TV's
+     * native output format internally. This is the same format Vosk expects.
      *
      * If the captured audio is silent for more than [silenceThresholdMs], [onSilenceDetected]
      * is called so the caller can fall back to microphone mode.
@@ -111,21 +111,15 @@ class AudioCaptureManager {
             .addMatchingUsage(AudioAttributes.USAGE_UNKNOWN)
             .build()
 
-        // Capture at 48kHz stereo (common TV output), then downsample to 16kHz mono
-        val captureRate = 48000
         val format = AudioFormat.Builder()
             .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-            .setSampleRate(captureRate)
-            .setChannelMask(AudioFormat.CHANNEL_IN_STEREO)
+            .setSampleRate(SAMPLE_RATE)
+            .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
             .build()
 
         val minBuffer = AudioRecord.getMinBufferSize(
-            captureRate, AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT
+            SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
         )
-        if (minBuffer <= 0) {
-            Log.e(TAG, "48kHz stereo not supported by audio hardware (minBuffer=$minBuffer)")
-            return false
-        }
 
         audioRecord = try {
             AudioRecord.Builder()
@@ -146,78 +140,39 @@ class AudioCaptureManager {
         }
 
         audioRecord?.startRecording()
-        Log.d(TAG, "System audio capture started at $captureRate Hz stereo")
+        Log.d(TAG, "System audio capture started at ${SAMPLE_RATE} Hz mono")
 
         captureJob = scope.launch {
-            val stereoBuffer = ByteArray(minBuffer)
+            val buffer = ByteArray(minBuffer)
             var logCounter = 0
             var silentFrames = 0
             val silenceThresholdFrames = 250 // ~5 seconds of zero audio
 
             while (isActive) {
-                val read = audioRecord?.read(stereoBuffer, 0, stereoBuffer.size) ?: -1
+                val read = audioRecord?.read(buffer, 0, buffer.size) ?: -1
                 if (read > 0) {
-                    val mono16k = downsample48kStereoTo16kMono(stereoBuffer.copyOf(read))
-                    if (mono16k.isNotEmpty()) {
-                        logCounter++
-                        if (logCounter >= 100) {
-                            logCounter = 0
-                            val rms = calculateRms(mono16k)
-                            Log.d(TAG, "System audio RMS level: $rms (samples=${mono16k.size / 2})")
+                    logCounter++
+                    if (logCounter >= 100) {
+                        logCounter = 0
+                        val rms = calculateRms(buffer.copyOf(read))
+                        Log.d(TAG, "System audio RMS level: $rms (samples=${read / 2})")
 
-                            if (rms < 1.0) {
-                                silentFrames++
-                                if (silentFrames >= silenceThresholdFrames) {
-                                    Log.w(TAG, "System audio is silent for 5+ seconds. The app may block capture.")
-                                    onSilenceDetected()
-                                    break
-                                }
-                            } else {
-                                silentFrames = 0
+                        if (rms < 1.0) {
+                            silentFrames++
+                            if (silentFrames >= silenceThresholdFrames) {
+                                Log.w(TAG, "System audio is silent for 5+ seconds. The app may block capture.")
+                                onSilenceDetected()
+                                break
                             }
+                        } else {
+                            silentFrames = 0
                         }
-                        onPcmData(mono16k)
                     }
+                    onPcmData(buffer.copyOf(read))
                 }
             }
         }
         return true
-    }
-
-    /**
-     * Convert 48kHz stereo 16-bit PCM to 16kHz mono 16-bit PCM.
-     * Strategy: average L/R channels, then take every 3rd sample.
-     */
-    private fun downsample48kStereoTo16kMono(stereoBytes: ByteArray): ByteArray {
-        // 48kHz stereo = 4 bytes per frame (2 bytes L + 2 bytes R)
-        // We process complete frames only
-        val frameCount = stereoBytes.size / 4
-        if (frameCount == 0) return byteArrayOf()
-
-        // Output: 1 mono sample for every 3 stereo frames (48000/16000 = 3)
-        val outputFrames = frameCount / 3
-        val monoBytes = ByteArray(outputFrames * 2)
-
-        for (i in 0 until outputFrames) {
-            val stereoIndex = i * 3 * 4  // every 3rd frame, 4 bytes per frame
-
-            // Read left channel (little-endian)
-            val left = (stereoBytes[stereoIndex].toInt() and 0xFF) or
-                    ((stereoBytes[stereoIndex + 1].toInt() and 0xFF) shl 8)
-            // Read right channel
-            val right = (stereoBytes[stereoIndex + 2].toInt() and 0xFF) or
-                    ((stereoBytes[stereoIndex + 3].toInt() and 0xFF) shl 8)
-
-            // Convert to signed shorts, average, and clip
-            val leftShort = left.toShort().toInt()
-            val rightShort = right.toShort().toInt()
-            val avg = ((leftShort + rightShort) / 2).toShort()
-
-            val outIndex = i * 2
-            monoBytes[outIndex] = (avg.toInt() and 0xFF).toByte()
-            monoBytes[outIndex + 1] = ((avg.toInt() shr 8) and 0xFF).toByte()
-        }
-        return monoBytes
     }
 
     /**
