@@ -1,0 +1,59 @@
+<resources>
+    <string name="app_name">subbub</string>
+    <string name="app_author">Jason Jordan</string>
+    <string name="supported_versions">Requires Android TV / Google TV 13 or later</string>
+    <string name="help_text">
+<![CDATA[
+What is subbub?
+subbub listens to the audio of whatever you are watching and translates it into English subtitles in real time. You can place subtitles directly over your screen so you can keep watching while reading.
+
+Supported Devices
+subbub works only on Android TV and Google TV running Android 13, 14 or 15. It will not install on older versions.
+
+How to use
+1. Choose an audio source:
+   • System Audio — captures the sound coming directly from the TV. This avoids background noise and gives the best results.
+   • Microphone — uses the device microphone as a fallback. This can pick up room noise and is less accurate.
+
+2. Choose the language being spoken on screen.
+
+3. Press Start Subtitles. The app will ask for the permissions explained below, then subtitles will appear.
+
+4. You can stop subtitles at any time by pulling down the notification shade and tapping the Stop button.
+
+Permissions and why they are needed
+
+• Draw over other apps
+  Required so subtitle text can appear on top of YouTube, live TV, or any other app you are watching. Without this, subtitles can only appear inside subbub itself.
+
+• Record audio
+  Android requires this permission even when we are capturing system audio, not the microphone. It is also used as a fallback when system audio capture is not possible.
+
+• Capture screen / MediaProjection
+  When you choose System Audio, Android shows a system dialog asking you to allow the app to capture what is on screen. We use this only to capture the audio stream, not to record video.
+
+What works and what does not
+
+✓ Free-to-air TV (OTA / tuner apps)
+  This is the best case. Broadcast TV audio is not blocked, so system-audio capture works reliably.
+
+✓ YouTube on Android TV
+  YouTube generally allows audio capture. Subtitles should appear smoothly.
+
+✗ Netflix, Disney+, Spotify, and some other streaming apps
+  These apps explicitly block audio playback capture for copyright reasons. If you try to use System Audio with these apps, subbub will capture silence. In that case switch to Microphone mode, or use subbub on a second device placed near the TV speakers.
+
+✗ Cheap TV sticks with very low RAM
+  subbub downloads a speech-recognition model (about 40–50 MB) and runs translation on the device. Devices with less than 2 GB of RAM may struggle or become unresponsive.
+
+Overlay behaviour
+  Subtitles are drawn in a system overlay window. On most Android TV and Google TV devices this works well, but some older or heavily customised TV interfaces may ignore overlay windows. If subtitles do not appear over other apps, they will still be visible when you return to subbub.
+
+Speech models
+  The first time you use a language, subbub downloads a small on-device speech model over Wi-Fi. After that, the model is stored on your device and works offline.
+
+Author
+  subbub was created by Jason Jordan.
+]]>
+    </string>
+</resources>
