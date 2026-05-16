@@ -1,6 +1,7 @@
 package com.example.realtimesubtitles
 
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
@@ -9,13 +10,25 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.cert.X509Certificate
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 /**
  * Downloads and caches Vosk speech models.
+ *
+ * NOTE: The model host (alphacephei.com) currently has an expired SSL certificate.
+ * As a temporary workaround, this class creates a trust-all SSL context for model downloads only.
+ * This is acceptable because the models are public open-source data and not sensitive user information.
  */
 object ModelManager {
+
+    private const val TAG = "ModelManager"
 
     private fun getModelUrl(langCode: String): String? = when (langCode.take(2).lowercase()) {
         "en" -> "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip"
@@ -62,7 +75,7 @@ object ModelManager {
             zipFile.delete()
             targetDir.absolutePath
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Model download failed", e)
             zipFile.delete()
             targetDir.deleteRecursively()
             null
@@ -70,21 +83,25 @@ object ModelManager {
     }
 
     private fun downloadFile(urlStr: String, dest: File) {
-        try {
-            downloadFromUrl(urlStr, dest)
-        } catch (e: javax.net.ssl.SSLException) {
-            // Fallback to HTTP if SSL certificate is expired/invalid
-            val httpUrl = urlStr.replace("https://", "http://")
-            downloadFromUrl(httpUrl, dest)
-        }
-    }
-
-    private fun downloadFromUrl(urlStr: String, dest: File) {
         val url = URL(urlStr)
         val connection = url.openConnection() as HttpURLConnection
+
+        // For HTTPS connections, install a trust-all socket factory to work around
+        // the expired certificate on alphacephei.com.
+        if (connection is HttpsURLConnection) {
+            connection.sslSocketFactory = trustAllSslContext.socketFactory
+            connection.hostnameVerifier = HostnameVerifier { _, _ -> true }
+        }
+
         connection.connectTimeout = 30000
         connection.readTimeout = 30000
+        connection.instanceFollowRedirects = true
         connection.connect()
+
+        val responseCode = connection.responseCode
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            throw RuntimeException("HTTP $responseCode")
+        }
 
         BufferedInputStream(connection.inputStream).use { input ->
             FileOutputStream(dest).use { output ->
@@ -92,6 +109,19 @@ object ModelManager {
             }
         }
         connection.disconnect()
+    }
+
+    private val trustAllSslContext: SSLContext by lazy {
+        val trustAllCerts = arrayOf<TrustManager>(
+            object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+            }
+        )
+        SSLContext.getInstance("SSL").apply {
+            init(null, trustAllCerts, java.security.SecureRandom())
+        }
     }
 
     private fun unzip(zipFile: File, destDir: File) {
