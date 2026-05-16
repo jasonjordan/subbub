@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Foreground service that captures audio and runs speech recognition.
+ * Foreground service that captures system audio and runs speech recognition.
  * Subtitles are displayed by SubtitleAccessibilityService, not by this service.
  */
 class SpeechRecognitionService : LifecycleService() {
@@ -33,19 +33,15 @@ class SpeechRecognitionService : LifecycleService() {
 
     private var isListening = false
     private var currentLanguage = ""
-    private var audioMode = AUDIO_MODE_MIC
 
     companion object {
         const val CHANNEL_ID = "RealtimeSubtitlesChannel"
         const val NOTIFICATION_ID = 1
-        const val EXTRA_AUDIO_MODE = "audio_mode"
         const val EXTRA_LANGUAGE = "language"
         const val EXTRA_TARGET_LANGUAGE = "target_language"
         const val EXTRA_PROJECTION_DATA = "projection_data"
         const val EXTRA_PROJECTION_RESULT_CODE = "projection_result_code"
         const val ACTION_STOP = "com.jasonjordan.subbub.ACTION_STOP"
-        const val AUDIO_MODE_SYSTEM = "system"
-        const val AUDIO_MODE_MIC = "mic"
         const val TAG = "SpeechRecService"
     }
 
@@ -74,29 +70,25 @@ class SpeechRecognitionService : LifecycleService() {
 
         startForeground(NOTIFICATION_ID, buildNotification("subbub — Starting subtitles..."))
 
-        audioMode = intent?.getStringExtra(EXTRA_AUDIO_MODE) ?: AUDIO_MODE_MIC
         currentLanguage = intent?.getStringExtra(EXTRA_LANGUAGE) ?: ""
         val targetLang = intent?.getStringExtra(EXTRA_TARGET_LANGUAGE) ?: "en"
         SubtitleState.sourceLanguage.value = currentLanguage
         SubtitleState.targetLanguage.value = targetLang
 
-        if (audioMode == AUDIO_MODE_SYSTEM) {
-            val resultCode = intent?.getIntExtra(EXTRA_PROJECTION_RESULT_CODE, 0) ?: 0
-            val data = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent?.getParcelableExtra(EXTRA_PROJECTION_DATA, Intent::class.java)
-            } else {
-                @Suppress("DEPRECATION")
-                intent?.getParcelableExtra(EXTRA_PROJECTION_DATA)
-            }
-            if (data != null && resultCode != 0) {
-                val mpManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-                mediaProjection = mpManager.getMediaProjection(resultCode, data)
-                startSystemAudioMode()
-            } else {
-                startMicMode()
-            }
+        val resultCode = intent?.getIntExtra(EXTRA_PROJECTION_RESULT_CODE, 0) ?: 0
+        val data = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent?.getParcelableExtra(EXTRA_PROJECTION_DATA, Intent::class.java)
         } else {
-            startMicMode()
+            @Suppress("DEPRECATION")
+            intent?.getParcelableExtra(EXTRA_PROJECTION_DATA)
+        }
+        if (data != null && resultCode != 0) {
+            val mpManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+            mediaProjection = mpManager.getMediaProjection(resultCode, data)
+            startSystemAudioMode()
+        } else {
+            updateNotification("subbub — No projection data. Captions cannot start.")
+            stopListening()
         }
         return START_STICKY
     }
@@ -120,52 +112,18 @@ class SpeechRecognitionService : LifecycleService() {
         stopSelf()
     }
 
-    private fun startMicMode() {
-        lifecycleScope.launch {
-            val lang = currentLanguage.takeIf { it.isNotBlank() } ?: "en"
-
-            val modelPath = prepareModelWithProgress(lang) ?: run {
-                updateNotification("subbub — Speech model unavailable")
-                SubtitleState.isListening.value = false
-                return@launch
-            }
-
-            isListening = true
-            SubtitleState.isListening.value = true
-            SubtitleState.downloadProgress.value = -1
-            SubtitleState.downloadStatus.value = ""
-            updateNotification("subbub — Listening via microphone...")
-
-            audioSource = RawAudioSpeechSource(
-                scope = lifecycleScope,
-                onText = { processText(it) },
-                onPartial = { /* Don't show untranslated partials */ },
-                onError = { err ->
-                    updateNotification("subbub — $err")
-                }
-            )
-
-            val started = audioSource?.startMicrophone(modelPath) ?: false
-            if (!started) {
-                updateNotification("subbub — Microphone capture failed")
-                isListening = false
-                SubtitleState.isListening.value = false
-            }
-        }
-    }
-
     private fun startSystemAudioMode() {
         if (mediaProjection == null) {
-            updateNotification("subbub — No projection, falling back to microphone")
-            startMicMode()
+            updateNotification("subbub — No projection. Captions cannot start.")
+            stopListening()
             return
         }
         lifecycleScope.launch {
             val lang = currentLanguage.takeIf { it.isNotBlank() } ?: "en"
 
             val modelPath = prepareModelWithProgress(lang) ?: run {
-                updateNotification("subbub — Speech model unavailable, falling back to microphone")
-                startMicMode()
+                updateNotification("subbub — Speech model unavailable.")
+                stopListening()
                 return@launch
             }
 
@@ -188,18 +146,13 @@ class SpeechRecognitionService : LifecycleService() {
                 projection = mediaProjection!!,
                 modelPath = modelPath,
                 onSilenceDetected = {
-                    Log.w(TAG, "System audio silent — app may block capture. Falling back to microphone.")
-                    updateNotification("subbub — App blocks audio capture. Switching to microphone...")
-                    audioSource?.release()
-                    audioSource = null
-                    startMicMode()
+                    Log.w(TAG, "System audio silent — app may block capture.")
+                    updateNotification("subbub — App blocks audio capture. No captions available.")
                 }
             ) ?: false
             if (!started) {
-                updateNotification("subbub — System audio failed, falling back to microphone")
-                audioSource?.release()
-                audioSource = null
-                startMicMode()
+                updateNotification("subbub — System audio failed. Captions cannot start.")
+                stopListening()
             }
         }
     }
@@ -218,7 +171,7 @@ class SpeechRecognitionService : LifecycleService() {
             if (path != null) {
                 SubtitleState.downloadStatus.value = "Model ready. Starting captions..."
                 updateNotification("subbub — Model ready. Starting captions...")
-                delay(1500) // Let user see the completion message
+                delay(1500)
             }
             path
         }

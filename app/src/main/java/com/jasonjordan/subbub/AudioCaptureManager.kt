@@ -4,7 +4,6 @@ import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioPlaybackCaptureConfiguration
 import android.media.AudioRecord
-import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.os.Build
 import android.util.Log
@@ -12,13 +11,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
- * Creates and manages AudioRecord instances for microphone or system-audio capture.
- * Both paths output raw PCM 16-bit mono 16kHz suitable for Vosk.
+ * Creates and manages AudioRecord instances for system-audio capture.
+ * Outputs raw PCM 16-bit mono 16kHz suitable for Vosk.
  */
 class AudioCaptureManager {
 
@@ -34,64 +32,13 @@ class AudioCaptureManager {
     fun isSystemAudioSupported(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
     /**
-     * Start capturing from the microphone. Returns true if started successfully.
-     */
-    fun startMicrophone(onPcmData: (ByteArray) -> Unit): Boolean {
-        stop()
-
-        val format = AudioFormat.Builder()
-            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-            .setSampleRate(SAMPLE_RATE)
-            .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
-            .build()
-
-        val minBuffer = AudioRecord.getMinBufferSize(
-            SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
-        )
-
-        audioRecord = AudioRecord.Builder()
-            .setAudioSource(MediaRecorder.AudioSource.DEFAULT)
-            .setAudioFormat(format)
-            .setBufferSizeInBytes(minBuffer * 2)
-            .build()
-
-        if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
-            Log.e(TAG, "Microphone AudioRecord failed to initialize")
-            audioRecord?.release()
-            audioRecord = null
-            return false
-        }
-
-        audioRecord?.startRecording()
-        Log.d(TAG, "Microphone capture started")
-
-        captureJob = scope.launch {
-            val buffer = ByteArray(minBuffer)
-            var logCounter = 0
-            while (isActive) {
-                val read = audioRecord?.read(buffer, 0, buffer.size) ?: -1
-                if (read > 0) {
-                    logCounter++
-                    if (logCounter >= 100) {
-                        logCounter = 0
-                        val rms = calculateRms(buffer.copyOf(read))
-                        Log.d(TAG, "Mic RMS level: $rms (samples=${read / 2})")
-                    }
-                    onPcmData(buffer.copyOf(read))
-                }
-            }
-        }
-        return true
-    }
-
-    /**
      * Start capturing system audio via MediaProjection. Returns true if started successfully.
      *
      * We request 16kHz mono — Android handles resampling/downmixing from the TV's
      * native output format internally. This is the same format Vosk expects.
      *
      * If the captured audio is silent for more than [silenceThresholdMs], [onSilenceDetected]
-     * is called so the caller can fall back to microphone mode.
+     * is called so the caller can show an appropriate message.
      */
     fun startSystemAudio(
         projection: MediaProjection,

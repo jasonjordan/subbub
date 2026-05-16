@@ -1,16 +1,13 @@
 package com.jasonjordan.subbub
 
 import android.media.projection.MediaProjection
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * Unified speech-to-text using raw AudioRecord + Vosk.
- * Works with either microphone or system-audio input.
- * Runs entirely in the calling scope (typically a foreground service),
- * so it survives app switching unlike Android's SpeechRecognizer.
+ * Speech-to-text using system audio capture + Vosk.
+ * Feeds raw PCM from AudioPlaybackCapture into the on-device recognizer.
  */
 class RawAudioSpeechSource(
     private val scope: CoroutineScope,
@@ -21,21 +18,6 @@ class RawAudioSpeechSource(
 
     private val capture = AudioCaptureManager()
     private var vosk: VoskSpeechEngine? = null
-
-    companion object {
-        private const val TAG = "RawAudioSpeechSource"
-    }
-
-    /**
-     * Start listening from the microphone.
-     */
-    fun startMicrophone(modelPath: String): Boolean {
-        vosk = VoskSpeechEngine(modelPath)
-        vosk?.startListening()
-        return capture.startMicrophone { pcm ->
-            feedVosk(pcm)
-        }
-    }
 
     /**
      * Start listening from system audio via MediaProjection.
