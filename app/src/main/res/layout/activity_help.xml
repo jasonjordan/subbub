@@ -4,27 +4,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6000000">
+    android:background="#D9000000">
 
     <TextView
         android:id="@+id/helpTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:text="subbub Help"
+        android:layout_marginTop="28dp"
+        android:text="Help"
         android:textColor="#FFFFFFFF"
-        android:textSize="36sp"
+        android:textSize="26sp"
         android:textStyle="bold"
+        android:letterSpacing="0.05"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <View
         android:id="@+id/titleDivider"
-        android:layout_width="120dp"
-        android:layout_height="3dp"
-        android:layout_marginTop="12dp"
-        android:background="#FF03DAC5"
+        android:layout_width="48dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="6dp"
+        android:background="#2DD4BF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/helpTitle" />
@@ -33,11 +34,11 @@
         android:id="@+id/helpScroll"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="56dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginHorizontal="120dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="14dp"
         android:fadeScrollbars="false"
-        android:scrollbarSize="6dp"
+        android:scrollbarSize="4dp"
         android:scrollbarStyle="outsideOverlay"
         app:layout_constraintBottom_toTopOf="@id/helpBackButton"
         app:layout_constraintEnd_toEndOf="parent"
@@ -48,30 +49,30 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:background="#33FFFFFF">
+            android:padding="14dp"
+            android:background="#1AFFFFFF">
 
             <TextView
                 android:id="@+id/helpText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#E0E0E0"
-                android:textSize="17sp"
-                android:lineSpacingMultiplier="1.4" />
+                android:textColor="#C0C0C0"
+                android:textSize="14sp"
+                android:lineSpacingMultiplier="1.3" />
 
         </LinearLayout>
     </ScrollView>
 
     <Button
         android:id="@+id/helpBackButton"
-        android:layout_width="220dp"
-        android:layout_height="56dp"
-        android:layout_marginBottom="40dp"
+        android:layout_width="180dp"
+        android:layout_height="44dp"
+        android:layout_marginBottom="28dp"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:text="Back"
-        android:textSize="18sp"
-        android:backgroundTint="#FF03DAC5"
+        android:textSize="14sp"
+        android:backgroundTint="#2DD4BF"
         android:textColor="#FF000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6000000">
+    android:background="#D9000000">
 
     <TextView
         android:id="@+id/titleText"
@@ -12,8 +12,9 @@
         android:layout_height="wrap_content"
         android:text="@string/app_name"
         android:textColor="#FFFFFFFF"
-        android:textSize="40sp"
+        android:textSize="28sp"
         android:textStyle="bold"
+        android:letterSpacing="0.05"
         app:layout_constraintBottom_toTopOf="@id/titleDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,10 +23,10 @@
 
     <View
         android:id="@+id/titleDivider"
-        android:layout_width="80dp"
-        android:layout_height="3dp"
-        android:layout_marginTop="8dp"
-        android:background="#FF03DAC5"
+        android:layout_width="48dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="6dp"
+        android:background="#2DD4BF"
         app:layout_constraintBottom_toTopOf="@id/descriptionText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,14 +34,13 @@
 
     <TextView
         android:id="@+id/descriptionText"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="64dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="6dp"
         android:gravity="center"
         android:text="by Jason Jordan"
-        android:textColor="#FF03DAC5"
-        android:textSize="18sp"
+        android:textColor="#2DD4BF"
+        android:textSize="14sp"
         app:layout_constraintBottom_toTopOf="@id/accessibilityBanner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -51,11 +51,11 @@
         android:id="@+id/accessibilityBanner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="80dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="120dp"
+        android:layout_marginTop="12dp"
         android:orientation="vertical"
-        android:padding="20dp"
-        android:background="#33FF5252"
+        android:padding="12dp"
+        android:background="#26FF6B6B"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/cardContainer"
         app:layout_constraintEnd_toEndOf="parent"
@@ -67,30 +67,30 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="Accessibility service required"
-            android:textColor="#FFFF5252"
-            android:textSize="18sp"
+            android:textColor="#FF6B6B"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:gravity="center"
-            android:text="subbub uses Android's accessibility service to display subtitles over any app. This is the only way to show captions reliably on Android TV."
-            android:textColor="#FFE0E0E0"
-            android:textSize="14sp" />
+            android:text="Enable subbub in Settings - Accessibility to display captions over any app."
+            android:textColor="#A0A0A0"
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/accessibilityEnableButton"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="12dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
             android:layout_gravity="center"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:text="Open Accessibility Settings"
-            android:textSize="14sp"
-            android:backgroundTint="#FFFF5252"
+            android:textSize="12sp"
+            android:backgroundTint="#FF6B6B"
             android:textColor="#FF000000" />
     </LinearLayout>
 
@@ -98,11 +98,11 @@
         android:id="@+id/cardContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="80dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="120dp"
+        android:layout_marginTop="14dp"
         android:orientation="vertical"
-        android:padding="24dp"
-        android:background="#33FFFFFF"
+        android:padding="16dp"
+        android:background="#1AFFFFFF"
         app:layout_constraintBottom_toTopOf="@id/startButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -112,72 +112,72 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Audio source"
-            android:textColor="#FF03DAC5"
-            android:textSize="16sp"
+            android:textColor="#2DD4BF"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/audioSourceSpinner"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="4dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="2dp"
             android:background="@android:drawable/btn_dropdown" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginVertical="16dp"
-            android:background="#22FFFFFF" />
+            android:layout_marginVertical="10dp"
+            android:background="#18FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Spoken language"
-            android:textColor="#FF03DAC5"
-            android:textSize="16sp"
+            android:textColor="#2DD4BF"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/sourceLanguageSpinner"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="4dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="2dp"
             android:background="@android:drawable/btn_dropdown" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginVertical="16dp"
-            android:background="#22FFFFFF" />
+            android:layout_marginVertical="10dp"
+            android:background="#18FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Subtitle language"
-            android:textColor="#FF03DAC5"
-            android:textSize="16sp"
+            android:textColor="#2DD4BF"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/targetLanguageSpinner"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="4dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="2dp"
             android:background="@android:drawable/btn_dropdown" />
 
     </LinearLayout>
 
     <Button
         android:id="@+id/startButton"
-        android:layout_width="240dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="28dp"
+        android:layout_width="200dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:text="Start Subtitles"
-        android:textSize="18sp"
+        android:textSize="14sp"
         android:textColor="#FF000000"
-        android:backgroundTint="#FF03DAC5"
+        android:backgroundTint="#2DD4BF"
         app:layout_constraintBottom_toTopOf="@id/helpButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -185,14 +185,16 @@
 
     <Button
         android:id="@+id/helpButton"
-        android:layout_width="240dp"
-        android:layout_height="52dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="32dp"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:text="Help"
-        android:textSize="16sp"
+        android:textSize="13sp"
+        android:backgroundTint="#33FFFFFF"
+        android:textColor="#FFFFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -202,14 +204,14 @@
         android:id="@+id/stopButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="24dp"
+        android:layout_margin="16dp"
         android:background="?attr/selectableItemBackground"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:padding="12dp"
+        android:padding="10dp"
         android:text="Stop"
         android:textColor="#FFFFFFFF"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -219,12 +221,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="40dp"
-        android:layout_marginBottom="64dp"
+        android:layout_marginBottom="48dp"
         android:background="#CC000000"
         android:gravity="center"
-        android:padding="16dp"
+        android:padding="14dp"
         android:textColor="#FFFFFFFF"
-        android:textSize="28sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
