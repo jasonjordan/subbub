@@ -103,6 +103,8 @@ class SpeechRecognitionService : LifecycleService() {
     fun stopListening() {
         isListening = false
         SubtitleState.isListening.value = false
+        SubtitleState.downloadProgress.value = -1
+        SubtitleState.downloadStatus.value = ""
         audioSource?.release()
         audioSource = null
         mediaProjection?.stop()
@@ -120,13 +122,17 @@ class SpeechRecognitionService : LifecycleService() {
     private fun startMicMode() {
         lifecycleScope.launch {
             val lang = currentLanguage.takeIf { it.isNotBlank() } ?: "en"
-            val modelPath = prepareModel(lang) ?: run {
+
+            val modelPath = prepareModelWithProgress(lang) ?: run {
                 updateNotification("subbub — Speech model unavailable")
+                SubtitleState.isListening.value = false
                 return@launch
             }
 
             isListening = true
             SubtitleState.isListening.value = true
+            SubtitleState.downloadProgress.value = -1
+            SubtitleState.downloadStatus.value = ""
             updateNotification("subbub — Listening via microphone...")
 
             audioSource = RawAudioSpeechSource(
@@ -155,7 +161,8 @@ class SpeechRecognitionService : LifecycleService() {
         }
         lifecycleScope.launch {
             val lang = currentLanguage.takeIf { it.isNotBlank() } ?: "en"
-            val modelPath = prepareModel(lang) ?: run {
+
+            val modelPath = prepareModelWithProgress(lang) ?: run {
                 updateNotification("subbub — Speech model unavailable, falling back to microphone")
                 startMicMode()
                 return@launch
@@ -163,6 +170,8 @@ class SpeechRecognitionService : LifecycleService() {
 
             isListening = true
             SubtitleState.isListening.value = true
+            SubtitleState.downloadProgress.value = -1
+            SubtitleState.downloadStatus.value = ""
             updateNotification("subbub — Capturing system audio...")
 
             audioSource = RawAudioSpeechSource(
@@ -184,13 +193,50 @@ class SpeechRecognitionService : LifecycleService() {
         }
     }
 
-    private suspend fun prepareModel(lang: String): String? {
+    private suspend fun prepareModelWithProgress(lang: String): String? {
         return if (ModelManager.isModelAvailable(applicationContext, lang)) {
             ModelManager.modelDir(applicationContext, lang).absolutePath
         } else {
-            updateNotification("subbub — Downloading speech model...")
-            ModelManager.prepareModel(applicationContext, lang)
+            SubtitleState.downloadStatus.value = "Downloading speech model for ${languageName(lang)}..."
+            SubtitleState.downloadProgress.value = 0
+            val path = ModelManager.prepareModel(applicationContext, lang) { percent ->
+                SubtitleState.downloadProgress.value = percent
+                SubtitleState.downloadStatus.value = "Downloading speech model: $percent%"
+                updateNotification("subbub — Downloading model: $percent%")
+            }
+            if (path != null) {
+                SubtitleState.downloadStatus.value = "Model ready. Starting captions..."
+                updateNotification("subbub — Model ready. Starting captions...")
+                delay(1500) // Let user see the completion message
+            }
+            path
         }
+    }
+
+    private fun languageName(code: String): String = when (code.take(2).lowercase()) {
+        "en" -> "English"
+        "es" -> "Spanish"
+        "fr" -> "French"
+        "de" -> "German"
+        "it" -> "Italian"
+        "pt" -> "Portuguese"
+        "ru" -> "Russian"
+        "zh" -> "Chinese"
+        "pl" -> "Polish"
+        "ja" -> "Japanese"
+        "ko" -> "Korean"
+        "ar" -> "Arabic"
+        "hi" -> "Hindi"
+        "nl" -> "Dutch"
+        "tr" -> "Turkish"
+        "vi" -> "Vietnamese"
+        "cs" -> "Czech"
+        "el" -> "Greek"
+        "he" -> "Hebrew"
+        "ro" -> "Romanian"
+        "sv" -> "Swedish"
+        "hu" -> "Hungarian"
+        else -> code
     }
 
     private fun processText(text: String) {

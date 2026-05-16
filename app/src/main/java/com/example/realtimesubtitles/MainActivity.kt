@@ -187,14 +187,43 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 SubtitleState.currentText.collect { text ->
-                    binding.subtitleText.text = text
-                    binding.subtitleText.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
+                    // Only show subtitle text if not currently downloading
+                    if (SubtitleState.downloadProgress.value < 0) {
+                        binding.subtitleText.text = text
+                        binding.subtitleText.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
+                    }
                 }
             }
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 SubtitleState.isListening.collect { updateUIState() }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                SubtitleState.downloadStatus.collect { status ->
+                    val progress = SubtitleState.downloadProgress.value
+                    if (progress >= 0 && status.isNotBlank()) {
+                        binding.subtitleText.text = status
+                        binding.subtitleText.visibility = View.VISIBLE
+                    } else if (progress == -1 && SubtitleState.currentText.value.isBlank()) {
+                        binding.subtitleText.visibility = View.GONE
+                    }
+                }
+            }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                SubtitleState.downloadProgress.collect { progress ->
+                    val status = SubtitleState.downloadStatus.value
+                    if (progress >= 0 && status.isNotBlank()) {
+                        binding.subtitleText.text = status
+                        binding.subtitleText.visibility = View.VISIBLE
+                    } else if (progress == -1 && SubtitleState.currentText.value.isBlank()) {
+                        binding.subtitleText.visibility = View.GONE
+                    }
+                }
             }
         }
     }

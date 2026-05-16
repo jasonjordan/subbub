@@ -59,8 +59,14 @@ object ModelManager {
     /**
      * Downloads and unzips the model if not already cached.
      * Returns the model directory path, or null if unavailable/failed.
+     *
+     * @param onProgress Called periodically with download percentage (0-100).
      */
-    suspend fun prepareModel(context: Context, langCode: String): String? = withContext(Dispatchers.IO) {
+    suspend fun prepareModel(
+        context: Context,
+        langCode: String,
+        onProgress: (Int) -> Unit = {}
+    ): String? = withContext(Dispatchers.IO) {
         val targetDir = modelDir(context, langCode)
         if (targetDir.exists()) return@withContext targetDir.absolutePath
 
@@ -70,7 +76,8 @@ object ModelManager {
 
         val zipFile = File(modelsDir, "$langCode.zip")
         try {
-            downloadFile(urlStr, zipFile)
+            downloadFile(urlStr, zipFile, onProgress)
+            onProgress(100)
             unzip(zipFile, targetDir)
             zipFile.delete()
             targetDir.absolutePath
@@ -82,7 +89,7 @@ object ModelManager {
         }
     }
 
-    private fun downloadFile(urlStr: String, dest: File) {
+    private fun downloadFile(urlStr: String, dest: File, onProgress: (Int) -> Unit) {
         val url = URL(urlStr)
         val connection = url.openConnection() as HttpURLConnection
 
@@ -103,9 +110,21 @@ object ModelManager {
             throw RuntimeException("HTTP $responseCode")
         }
 
+        val totalBytes = connection.contentLength
+        var downloadedBytes = 0L
+        val buffer = ByteArray(8192)
+
         BufferedInputStream(connection.inputStream).use { input ->
             FileOutputStream(dest).use { output ->
-                input.copyTo(output)
+                var read: Int
+                while (input.read(buffer).also { read = it } != -1) {
+                    output.write(buffer, 0, read)
+                    downloadedBytes += read
+                    if (totalBytes > 0) {
+                        val percent = ((downloadedBytes * 100) / totalBytes).toInt()
+                        onProgress(percent)
+                    }
+                }
             }
         }
         connection.disconnect()
