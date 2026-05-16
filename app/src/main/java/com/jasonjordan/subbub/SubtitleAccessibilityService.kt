@@ -91,16 +91,20 @@ class SubtitleAccessibilityService : AccessibilityService() {
     }
 
     private fun show(text: String) {
+        Log.d(TAG, "show('$text')")
         handler.post {
             ensureViewAdded()
             overlayText?.text = text
             overlayView?.visibility = View.VISIBLE
+            Log.d(TAG, "Overlay visible with text: '$text'")
         }
     }
 
     private fun hide() {
+        Log.d(TAG, "hide()")
         handler.post {
             overlayView?.visibility = View.GONE
+            Log.d(TAG, "Overlay hidden")
         }
     }
 
