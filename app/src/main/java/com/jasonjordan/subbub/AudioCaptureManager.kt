@@ -122,12 +122,21 @@ class AudioCaptureManager {
         val minBuffer = AudioRecord.getMinBufferSize(
             captureRate, AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT
         )
+        if (minBuffer <= 0) {
+            Log.e(TAG, "48kHz stereo not supported by audio hardware (minBuffer=$minBuffer)")
+            return false
+        }
 
-        audioRecord = AudioRecord.Builder()
-            .setAudioFormat(format)
-            .setBufferSizeInBytes(minBuffer * 2)
-            .setAudioPlaybackCaptureConfig(config)
-            .build()
+        audioRecord = try {
+            AudioRecord.Builder()
+                .setAudioFormat(format)
+                .setBufferSizeInBytes(minBuffer * 2)
+                .setAudioPlaybackCaptureConfig(config)
+                .build()
+        } catch (e: Exception) {
+            Log.e(TAG, "AudioRecord build failed for system audio", e)
+            null
+        }
 
         if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
             Log.e(TAG, "System AudioRecord failed to initialize")
