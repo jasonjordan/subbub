@@ -1,7 +1,7 @@
 package com.example.realtimesubtitles
 
-import com.alphacephei.vosk.Model
-import com.alphacephei.vosk.Recognizer
+import org.vosk.Model
+import org.vosk.Recognizer
 import org.json.JSONObject
 
 /**
