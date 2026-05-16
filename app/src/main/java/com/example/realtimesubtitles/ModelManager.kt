@@ -70,6 +70,16 @@ object ModelManager {
     }
 
     private fun downloadFile(urlStr: String, dest: File) {
+        try {
+            downloadFromUrl(urlStr, dest)
+        } catch (e: javax.net.ssl.SSLException) {
+            // Fallback to HTTP if SSL certificate is expired/invalid
+            val httpUrl = urlStr.replace("https://", "http://")
+            downloadFromUrl(httpUrl, dest)
+        }
+    }
+
+    private fun downloadFromUrl(urlStr: String, dest: File) {
         val url = URL(urlStr)
         val connection = url.openConnection() as HttpURLConnection
         connection.connectTimeout = 30000
