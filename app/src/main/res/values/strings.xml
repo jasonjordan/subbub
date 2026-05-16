@@ -53,6 +53,24 @@ What works and what does not
 Overlay behaviour
   Subtitles are drawn in a system overlay window. On most Android TV and Google TV devices this works well, but some older or heavily customised TV interfaces may ignore overlay windows. If subtitles do not appear over other apps, they will still be visible when you return to subbub.
 
+Troubleshooting
+
+• Subtitles disappear when I switch to another app
+  Some Android TV manufacturers (e.g., certain Sony, TCL, Xiaomi, and Fire TV models) block third-party overlays when their own launcher or video apps are in focus, even if you granted the Draw over other apps permission. This is a system restriction, not a bug in subbub.
+
+  Workarounds:
+  1. Return to subbub periodically to check subtitles.
+  2. Use a second Android device (phone or tablet) running subbub in Microphone mode, placed near the TV speakers. This avoids the TV's overlay restrictions entirely.
+  3. On some TVs, enabling Developer Options → Disable HW overlays may help, but this is device-specific.
+
+• Subtitles never appear at all
+  Make sure you granted all three permissions:
+  1. Draw over other apps — open subbub, tap Start, and allow when prompted.
+  2. Microphone — allow when prompted.
+  3. Screen capture — allow the system dialog when using System Audio mode.
+
+  If any permission was denied, go to Settings → Apps → subbub → Permissions and enable them manually.
+
 Speech models
   The first time you use a spoken language, subbub downloads a small on-device speech model over Wi-Fi. After that, the model is stored on your device and works offline.
 

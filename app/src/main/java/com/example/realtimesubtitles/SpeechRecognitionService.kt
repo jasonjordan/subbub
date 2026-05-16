@@ -31,6 +31,7 @@ class SpeechRecognitionService : LifecycleService() {
     private var isListening = false
     private var currentLanguage = ""
     private var audioMode = AUDIO_MODE_MIC
+    private var overlayWatchdogJob: kotlinx.coroutines.Job? = null
 
     companion object {
         const val CHANNEL_ID = "RealtimeSubtitlesChannel"
@@ -102,6 +103,8 @@ class SpeechRecognitionService : LifecycleService() {
     fun stopListening() {
         isListening = false
         SubtitleState.isListening.value = false
+        overlayWatchdogJob?.cancel()
+        overlayWatchdogJob = null
         micSource?.stop()
         micSource = null
         systemSource?.stop()
@@ -119,10 +122,24 @@ class SpeechRecognitionService : LifecycleService() {
         stopSelf()
     }
 
+    private fun startOverlayWatchdog() {
+        overlayWatchdogJob?.cancel()
+        overlayWatchdogJob = lifecycleScope.launch {
+            while (isActive && isListening) {
+                delay(1200)
+                val text = SubtitleState.currentText.value
+                if (text.isNotBlank() && overlayManager?.canOverlay == true) {
+                    overlayManager?.show(text)
+                }
+            }
+        }
+    }
+
     private fun startMicMode() {
         isListening = true
         SubtitleState.isListening.value = true
         updateNotification("subbub — Listening via microphone...")
+        startOverlayWatchdog()
 
         micSource = MicSpeechSource(
             context = this,
@@ -156,6 +173,7 @@ class SpeechRecognitionService : LifecycleService() {
             isListening = true
             SubtitleState.isListening.value = true
             updateNotification("subbub — Capturing system audio...")
+            startOverlayWatchdog()
 
             systemSource = SystemAudioSource(
                 modelPath = modelPath,
