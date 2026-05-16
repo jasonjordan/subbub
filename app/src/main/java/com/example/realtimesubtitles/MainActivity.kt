@@ -7,8 +7,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionManager
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
@@ -52,16 +50,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val overlaySettingsLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (Settings.canDrawOverlays(this)) {
-            tryStartAfterPermissions()
-        } else {
-            Toast.makeText(this, "Overlay permission is required to show subtitles over other apps", Toast.LENGTH_LONG).show()
-        }
-    }
-
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             val localBinder = binder as? SpeechRecognitionService.LocalBinder
@@ -87,6 +75,11 @@ class MainActivity : AppCompatActivity() {
         observeSubtitles()
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateAccessibilityBanner()
+    }
+
     override fun onStart() {
         super.onStart()
         Intent(this, SpeechRecognitionService::class.java).also { intent ->
@@ -99,6 +92,15 @@ class MainActivity : AppCompatActivity() {
         if (bound) {
             unbindService(connection)
             bound = false
+        }
+    }
+
+    private fun updateAccessibilityBanner() {
+        val enabled = SubtitleAccessibilityService.isEnabled(this)
+        if (enabled) {
+            binding.accessibilityBanner.visibility = View.GONE
+        } else {
+            binding.accessibilityBanner.visibility = View.VISIBLE
         }
     }
 
@@ -139,7 +141,7 @@ class MainActivity : AppCompatActivity() {
         val sourceAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages.map { it.first })
         sourceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.sourceLanguageSpinner.adapter = sourceAdapter
-        binding.sourceLanguageSpinner.setSelection(0) // English default
+        binding.sourceLanguageSpinner.setSelection(0)
 
         binding.sourceLanguageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -152,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         val targetAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages.map { it.first })
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.targetLanguageSpinner.adapter = targetAdapter
-        binding.targetLanguageSpinner.setSelection(0) // English default
+        binding.targetLanguageSpinner.setSelection(0)
 
         binding.targetLanguageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -161,7 +163,6 @@ class MainActivity : AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        // Set initial state
         SubtitleState.sourceLanguage.value = languages[0].second
         SubtitleState.targetLanguage.value = languages[0].second
     }
@@ -175,6 +176,10 @@ class MainActivity : AppCompatActivity() {
         }
         binding.helpButton.setOnClickListener {
             startActivity(Intent(this, HelpActivity::class.java))
+        }
+        binding.accessibilityEnableButton.setOnClickListener {
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            startActivity(intent)
         }
     }
 
@@ -196,6 +201,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUIState() {
         val listening = SubtitleState.isListening.value
+        val accessibilityEnabled = SubtitleAccessibilityService.isEnabled(this)
+
+        binding.startButton.isEnabled = accessibilityEnabled && !listening
+        binding.startButton.alpha = if (accessibilityEnabled && !listening) 1.0f else 0.4f
         binding.startButton.visibility = if (listening) View.GONE else View.VISIBLE
         binding.helpButton.visibility = if (listening) View.GONE else View.VISIBLE
         binding.stopButton.visibility = if (listening) View.VISIBLE else View.GONE
@@ -207,13 +216,11 @@ class MainActivity : AppCompatActivity() {
     private fun tryStartAfterPermissions() {
         if (SubtitleState.isListening.value) return
 
-        // 1. Overlay permission
-        if (!Settings.canDrawOverlays(this)) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:$packageName")
-            )
-            overlaySettingsLauncher.launch(intent)
+        // 1. Accessibility service is required
+        if (!SubtitleAccessibilityService.isEnabled(this)) {
+            Toast.makeText(this, "Please enable subbub in Settings > Accessibility first", Toast.LENGTH_LONG).show()
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            startActivity(intent)
             return
         }
 

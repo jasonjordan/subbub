@@ -58,6 +58,12 @@ class SubtitleAccessibilityService : AccessibilityService() {
             flags = AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
         }
 
+        // Show any text that was already set before we connected
+        val existingText = SubtitleState.currentText.value
+        if (existingText.isNotBlank()) {
+            show(existingText)
+        }
+
         scope.launch {
             SubtitleState.currentText.collect { text ->
                 if (text.isNotBlank()) {

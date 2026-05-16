@@ -15,14 +15,16 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Foreground service that captures audio and runs speech recognition.
+ * Subtitles are displayed by SubtitleAccessibilityService, not by this service.
+ */
 class SpeechRecognitionService : LifecycleService() {
 
     private val binder = LocalBinder()
-    private var overlayManager: OverlayManager? = null
     private var translationManager: TranslationManager? = null
 
     private var audioSource: RawAudioSpeechSource? = null
@@ -31,7 +33,6 @@ class SpeechRecognitionService : LifecycleService() {
     private var isListening = false
     private var currentLanguage = ""
     private var audioMode = AUDIO_MODE_MIC
-    private var overlayWatchdogJob: kotlinx.coroutines.Job? = null
 
     companion object {
         const val CHANNEL_ID = "RealtimeSubtitlesChannel"
@@ -54,7 +55,6 @@ class SpeechRecognitionService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        overlayManager = OverlayManager(applicationContext)
         translationManager = TranslationManager(applicationContext)
     }
 
@@ -103,13 +103,11 @@ class SpeechRecognitionService : LifecycleService() {
     fun stopListening() {
         isListening = false
         SubtitleState.isListening.value = false
-        overlayWatchdogJob?.cancel()
-        overlayWatchdogJob = null
         audioSource?.release()
         audioSource = null
         mediaProjection?.stop()
         mediaProjection = null
-        overlayManager?.remove()
+        SubtitleState.currentText.value = ""
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         } else {
@@ -117,19 +115,6 @@ class SpeechRecognitionService : LifecycleService() {
             stopForeground(true)
         }
         stopSelf()
-    }
-
-    private fun startOverlayWatchdog() {
-        overlayWatchdogJob?.cancel()
-        overlayWatchdogJob = lifecycleScope.launch {
-            while (isActive && isListening) {
-                delay(1200)
-                val text = SubtitleState.currentText.value
-                if (text.isNotBlank() && overlayManager?.canOverlay == true) {
-                    overlayManager?.show(text)
-                }
-            }
-        }
     }
 
     private fun startMicMode() {
@@ -143,12 +128,11 @@ class SpeechRecognitionService : LifecycleService() {
             isListening = true
             SubtitleState.isListening.value = true
             updateNotification("subbub — Listening via microphone...")
-            startOverlayWatchdog()
 
             audioSource = RawAudioSpeechSource(
                 scope = lifecycleScope,
                 onText = { processText(it) },
-                onPartial = { showSubtitle(it, isPartial = true) },
+                onPartial = { showSubtitle(it) },
                 onError = { err ->
                     updateNotification("subbub — $err")
                 }
@@ -180,12 +164,11 @@ class SpeechRecognitionService : LifecycleService() {
             isListening = true
             SubtitleState.isListening.value = true
             updateNotification("subbub — Capturing system audio...")
-            startOverlayWatchdog()
 
             audioSource = RawAudioSpeechSource(
                 scope = lifecycleScope,
                 onText = { processText(it) },
-                onPartial = { showSubtitle(it, isPartial = true) },
+                onPartial = { showSubtitle(it) },
                 onError = { err ->
                     updateNotification("subbub — $err")
                 }
@@ -220,20 +203,17 @@ class SpeechRecognitionService : LifecycleService() {
                 val translated = withContext(Dispatchers.IO) {
                     translationManager?.translate(text, sourceLang, targetLang) ?: text
                 }
-                showSubtitle(translated, isPartial = false)
+                showSubtitle(translated)
                 scheduleClear(translated)
             }
         } else {
-            showSubtitle(text, isPartial = false)
+            showSubtitle(text)
             scheduleClear(text)
         }
     }
 
-    private fun showSubtitle(text: String, isPartial: Boolean) {
+    private fun showSubtitle(text: String) {
         SubtitleState.currentText.value = text
-        if (overlayManager?.canOverlay == true) {
-            overlayManager?.show(text)
-        }
     }
 
     private fun scheduleClear(lastText: String) {
@@ -241,7 +221,6 @@ class SpeechRecognitionService : LifecycleService() {
             delay(4500)
             if (SubtitleState.currentText.value == lastText) {
                 SubtitleState.currentText.value = ""
-                overlayManager?.hide()
             }
         }
     }

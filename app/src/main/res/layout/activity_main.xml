@@ -41,24 +41,72 @@
         android:text="by Jason Jordan"
         android:textColor="#FF03DAC5"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@id/cardContainer"
+        app:layout_constraintBottom_toTopOf="@id/accessibilityBanner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titleDivider" />
+
+    <!-- Accessibility service banner -->
+    <LinearLayout
+        android:id="@+id/accessibilityBanner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="80dp"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:background="#33FF5252"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/cardContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/descriptionText">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Accessibility service required"
+            android:textColor="#FFFF5252"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="subbub uses Android's accessibility service to display subtitles over any app. This is the only way to show captions reliably on Android TV."
+            android:textColor="#FFE0E0E0"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/accessibilityEnableButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:text="Open Accessibility Settings"
+            android:textSize="14sp"
+            android:backgroundTint="#FFFF5252"
+            android:textColor="#FF000000" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/cardContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="80dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:orientation="vertical"
         android:padding="24dp"
         android:background="#33FFFFFF"
         app:layout_constraintBottom_toTopOf="@id/startButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/descriptionText">
+        app:layout_constraintTop_toBottomOf="@id/accessibilityBanner">
 
         <TextView
             android:layout_width="wrap_content"
